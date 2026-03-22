@@ -1,0 +1,132 @@
+# ============================================================
+# Oracle OPC P6 Pipeline - Application Configuration
+# Secrets are loaded from environment variables (see .env.example).
+# ============================================================
+
+opc:
+  # Base URL and token URL are set via OPC_BASE_URL / OPC_TOKEN_URL env vars
+  api_version: "v2"
+  request_timeout_seconds: 30
+  max_retries: 3
+  retry_wait_seconds: 2
+  page_size: 500            # Records per paginated request
+  # P6 fields to extract per entity (comma-separated OPC field names)
+  project_fields:
+    - ObjectId
+    - Id
+    - Name
+    - Status
+    - StartDate
+    - FinishDate
+    - PlannedStartDate
+    - PlannedFinishDate
+    - DataDate
+    - TotalBudgetedCost
+    - ActualTotalCost
+    - EarnedValueCost
+    - PlannedValueCost
+    - CostPerformanceIndex
+    - SchedulePerformanceIndex
+    - EstimateAtCompletion
+    - BudgetAtCompletion
+    - SummaryBudget
+  wbs_fields:
+    - ObjectId
+    - ProjectObjectId
+    - Code
+    - Name
+    - ParentObjectId
+    - SequenceNumber
+    - TotalBudgetedCost
+    - ActualTotalCost
+  activity_fields:
+    - ObjectId
+    - ProjectObjectId
+    - WBSObjectId
+    - Id
+    - Name
+    - Type
+    - Status
+    - PlannedStartDate
+    - PlannedFinishDate
+    - ActualStartDate
+    - ActualFinishDate
+    - PlannedTotalCost
+    - ActualTotalCost
+    - BudgetAtCompletion
+    - EarnedValueCost
+    - PlannedDuration
+    - RemainingDuration
+    - PercentComplete
+  resource_fields:
+    - ObjectId
+    - Id
+    - Name
+    - ResourceType
+    - PricePerUnit
+    - UnitOfMeasure
+    - IsActive
+    - MaxUnitsPerTime
+    - DefaultUnitsPerTime
+    - ParentObjectId
+    - RoleObjectId
+  resource_assignment_fields:
+    - ObjectId
+    - ActivityObjectId
+    - ProjectObjectId
+    - ResourceObjectId
+    - RoleObjectId
+    - PlannedUnits
+    - ActualUnits
+    - RemainingUnits
+    - PlannedCost
+    - ActualCost
+    - RemainingCost
+    - PlannedStartDate
+    - PlannedFinishDate
+    - ActualStartDate
+    - ActualFinishDate
+
+oracle:
+  pool_min: 2
+  pool_max: 10
+  pool_increment: 1
+  schema: "P6_DATA"        # Overridable via ORACLE_SCHEMA env var
+  tables:
+    projects: "P6_PROJECTS"
+    wbs: "P6_WBS"
+    activities: "P6_ACTIVITIES"
+    resources: "P6_RESOURCES"
+    resource_assignments: "P6_RESOURCE_ASSIGNMENTS"
+    cost_metrics: "P6_COST_METRICS"
+    resource_metrics: "P6_RESOURCE_METRICS"
+
+minio:
+  raw_bucket: "p6-raw"          # Overridable via MINIO_RAW_BUCKET env var
+  processed_bucket: "p6-processed"
+  raw_prefix: "raw"
+  processed_prefix: "processed"
+  file_format:
+    raw: "json"
+    processed: "parquet"
+
+airflow:
+  dag_owner: "data_engineering"
+  default_retries: 2
+  retry_delay_minutes: 5
+  email_on_failure: false
+  email_on_retry: false
+  # Airflow Connection IDs (configure in Airflow UI or via airflow connections)
+  connections:
+    opc_http: "opc_http_conn"
+    oracle_db: "oracle_p6_conn"
+    minio_s3: "minio_s3_conn"
+
+pipeline:
+  # Projects to extract (empty = all active projects)
+  project_filter_status:
+    - "Active"
+    - "What-if"
+  # Earned value calculation method: "BAC_CPI" or "AC_PLUS_REMAINING"
+  eac_method: "BAC_CPI"
+  run_date_format: "%Y-%m-%d"

@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPC API — Interactive Code Learning</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+/* ── RESET & TOKENS ─────────────────────────────────────── */
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b22;
+  --surface2: #1e2430;
+  --border:   #2d3341;
+  --acc:      #7c6af5;
+  --acc2:     #58b8f0;
+  --acc3:     #52cc9a;
+  --acc4:     #f5a623;
+  --acc5:     #f06292;
+  --text:     #e6e9f4;
+  --muted:    #7b809a;
+  --correct:  #1a3a2a;
+  --wrong:    #3a1a1a;
+  --correct-b:#52cc9a;
+  --wrong-b:  #f06292;
+  --r: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+nav{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);height:100vh;position:sticky;top:0;overflow-y:auto;display:flex;flex-direction:column;padding:20px 0;}
+.nav-head{padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+.nav-head a{font-size:11px;color:var(--muted);text-decoration:none;}
+.nav-head a:hover{color:var(--acc2);}
+.nav-head h2{font-size:14px;font-weight:700;color:var(--acc);margin-top:6px;}
+.nav-head p{font-size:11px;color:var(--muted);margin-top:2px;}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0%;transition:width .4s;}
+.nav-progress-label{font-size:10px;color:var(--muted);margin-top:4px;}
+
+.nav-section{padding:6px 18px 2px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:8px;}
+nav a.lesson-link{display:flex;align-items:center;gap:10px;padding:9px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;border-left:3px solid transparent;transition:all .15s;}
+nav a.lesson-link:hover,nav a.lesson-link.active{color:var(--text);background:rgba(124,106,245,.1);border-left-color:var(--acc);}
+.lesson-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;transition:all .3s;}
+.lesson-dot.done{background:var(--acc3);border-color:var(--acc3);color:#000;}
+.lesson-dot.active{border-color:var(--acc);color:var(--acc);}
+
+/* ── MAIN ────────────────────────────────────────────────── */
+main{flex:1;padding:36px 52px;max-width:980px;}
+
+/* ── LESSON HEADER ──────────────────────────────────────── */
+.lesson{display:none;}
+.lesson.active{display:block;}
+.lesson-tag{font-size:11px;font-weight:700;color:var(--acc);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+h1{font-size:28px;font-weight:800;margin-bottom:8px;line-height:1.25;}
+h1 span{color:var(--acc2);}
+.intro{font-size:14px;color:var(--muted);margin-bottom:28px;max-width:640px;}
+h2{font-size:18px;font-weight:700;margin:28px 0 12px;color:var(--text);}
+h3{font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--acc2);}
+p{font-size:13.5px;color:var(--muted);margin-bottom:12px;}
+strong{color:var(--text);}
+
+/* ── ANNOTATED CODE ─────────────────────────────────────── */
+.code-block{position:relative;margin:18px 0;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);}
+.code-label{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);padding:7px 16px;letter-spacing:.6px;border-bottom:1px solid var(--border);}
+pre{margin:0 !important;}
+pre code{padding:18px !important;font-size:12.5px !important;line-height:1.7;}
+
+/* Lines that can be clicked */
+.ann-line{display:block;cursor:pointer;border-radius:3px;padding:0 2px;transition:background .12s;}
+.ann-line:hover{background:rgba(124,106,245,.12);}
+.ann-line.highlighted{background:rgba(124,106,245,.18);border-left:3px solid var(--acc);padding-left:6px;}
+
+/* Annotation popover */
+.annotation{display:none;background:var(--surface);border:1px solid var(--acc);border-radius:8px;padding:12px 16px;margin:0 16px 12px;font-size:13px;color:var(--text);position:relative;}
+.annotation::before{content:'';position:absolute;top:-7px;left:24px;width:12px;height:12px;background:var(--surface);border-top:1px solid var(--acc);border-left:1px solid var(--acc);transform:rotate(45deg);}
+.annotation.show{display:block;}
+.annotation-tag{font-size:10px;font-weight:700;color:var(--acc);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;}
+.annotation p{margin:0;font-size:13px;color:var(--muted);}
+.annotation strong{color:var(--text);}
+.annotation code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11.5px;color:var(--acc2);}
+
+/* ── VISUAL DIAGRAMS ─────────────────────────────────────── */
+.visual{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin:18px 0;overflow-x:auto;}
+.visual-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+
+/* OAuth2 flow */
+.flow-row{display:flex;align-items:center;gap:0;margin-bottom:8px;flex-wrap:wrap;}
+.flow-box{padding:8px 14px;border-radius:7px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid;}
+.flow-arrow{color:var(--muted);padding:0 10px;font-size:16px;}
+.fbox-p{background:rgba(124,106,245,.12);border-color:var(--acc);color:var(--acc);}
+.fbox-b{background:rgba(88,184,240,.1);border-color:var(--acc2);color:var(--acc2);}
+.fbox-g{background:rgba(82,204,154,.1);border-color:var(--acc3);color:var(--acc3);}
+.fbox-o{background:rgba(245,166,35,.1);border-color:var(--acc4);color:var(--acc4);}
+
+/* Pagination visual */
+.pages{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.page-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:11px;text-align:center;}
+.page-box .pg-label{color:var(--muted);font-size:10px;}
+.page-box .pg-num{font-size:13px;font-weight:700;color:var(--acc2);margin:2px 0;}
+.page-box .pg-off{font-size:10px;color:var(--muted);}
+.page-box.last{border-color:var(--acc3);background:rgba(82,204,154,.07);}
+.page-box.last .pg-label{color:var(--acc3);}
+
+/* Retry timeline */
+.timeline{display:flex;align-items:center;gap:0;margin-top:12px;}
+.tl-event{text-align:center;min-width:80px;}
+.tl-dot{width:12px;height:12px;border-radius:50%;margin:0 auto 4px;}
+.tl-dot.attempt{background:var(--acc);}
+.tl-dot.wait{background:var(--border);}
+.tl-dot.fail{background:var(--acc5);}
+.tl-dot.success{background:var(--acc3);}
+.tl-label{font-size:10px;color:var(--muted);}
+.tl-line{flex:1;height:2px;background:var(--border);}
+
+/* ── CALLOUT ─────────────────────────────────────────────── */
+.callout{border-radius:var(--r);padding:13px 16px;margin:16px 0;font-size:13px;border-left:4px solid;}
+.callout-info{background:rgba(88,184,240,.07);border-color:var(--acc2);}
+.callout-warn{background:rgba(245,166,35,.07);border-color:var(--acc4);}
+.callout-tip{background:rgba(124,106,245,.07);border-color:var(--acc);}
+.callout strong{display:block;margin-bottom:3px;font-size:12.5px;}
+.callout p,.callout ul{margin:0;font-size:13px;color:var(--muted);}
+.callout ul{padding-left:16px;margin-top:4px;}
+
+/* ── FILL-IN-THE-BLANK ───────────────────────────────────── */
+.exercise{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin:20px 0;overflow:hidden;}
+.exercise-head{background:var(--surface);padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.exercise-head .ex-icon{font-size:16px;}
+.exercise-head h3{font-size:13px;font-weight:700;color:var(--text);margin:0;}
+.exercise-head .ex-desc{font-size:11.5px;color:var(--muted);margin-left:auto;}
+.exercise-body{padding:18px;}
+.exercise-body pre{margin:0;border:none;border-radius:6px;}
+.exercise-body pre code{padding:16px !important;font-size:12.5px !important;}
+.blank{display:inline-block;background:rgba(124,106,245,.15);border:1px dashed var(--acc);border-radius:4px;min-width:80px;text-align:center;color:transparent;user-select:none;font-size:12px;padding:0 6px;cursor:pointer;transition:all .2s;position:relative;}
+.blank:hover{background:rgba(124,106,245,.25);}
+.blank::after{content:'???';color:var(--acc);font-size:11px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.blank.revealed{color:var(--acc2);background:rgba(88,184,240,.1);border-color:var(--acc2);border-style:solid;cursor:default;}
+.blank.revealed::after{content:none;}
+.reveal-btn{margin-top:14px;padding:8px 18px;background:rgba(124,106,245,.15);border:1px solid var(--acc);border-radius:6px;color:var(--acc);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.reveal-btn:hover{background:rgba(124,106,245,.3);}
+.reveal-btn.done{background:rgba(82,204,154,.12);border-color:var(--acc3);color:var(--acc3);pointer-events:none;}
+
+/* ── QUIZ ────────────────────────────────────────────────── */
+.quiz{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin:24px 0;overflow:hidden;}
+.quiz-head{background:var(--surface);padding:12px 18px;border-bottom:1px solid var(--border);}
+.quiz-head h3{font-size:13px;font-weight:700;margin:0;color:var(--text);}
+.quiz-q{padding:18px 18px 0;}
+.quiz-q p{font-size:13.5px;color:var(--text);font-weight:500;margin-bottom:12px;}
+.quiz-q code{background:var(--surface);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--acc2);}
+.options{display:flex;flex-direction:column;gap:8px;padding:0 18px 18px;}
+.option{padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;transition:all .15s;display:flex;align-items:center;gap:10px;}
+.option:hover:not(.locked){border-color:var(--acc);background:rgba(124,106,245,.08);}
+.option .opt-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .15s;}
+.option.correct{background:var(--correct);border-color:var(--correct-b);}
+.option.correct .opt-radio{background:var(--correct-b);border-color:var(--correct-b);}
+.option.wrong{background:var(--wrong);border-color:var(--wrong-b);}
+.option.wrong .opt-radio{background:var(--wrong-b);border-color:var(--wrong-b);}
+.option.locked{cursor:default;}
+.quiz-feedback{padding:10px 18px 16px;font-size:13px;display:none;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{color:var(--acc3);}
+.quiz-feedback.bad{color:var(--acc5);}
+
+/* ── ENDPOINT TABLE ──────────────────────────────────────── */
+.table-wrap{overflow-x:auto;margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{background:var(--surface2);color:var(--text);padding:9px 13px;text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;border-bottom:2px solid var(--border);}
+td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--muted);}
+tr:last-child td{border:none;}
+td:first-child{color:var(--acc2);font-family:monospace;font-size:12px;}
+td code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--acc4);}
+
+/* ── NAV BUTTONS ─────────────────────────────────────────── */
+.lesson-nav{display:flex;justify-content:space-between;margin-top:44px;padding-top:24px;border-top:1px solid var(--border);}
+.nav-btn{padding:10px 22px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;}
+.nav-btn.prev{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.nav-btn.prev:hover{color:var(--text);border-color:var(--acc);}
+.nav-btn.next{background:var(--acc);color:#fff;}
+.nav-btn.next:hover{background:#8f7ef7;}
+.nav-btn:disabled{opacity:.35;cursor:default;}
+
+/* ── BADGE ───────────────────────────────────────────────── */
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.badge{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;}
+.badge-p{background:rgba(124,106,245,.18);color:#a89ef8;border:1px solid rgba(124,106,245,.3);}
+.badge-b{background:rgba(88,184,240,.12);color:var(--acc2);border:1px solid rgba(88,184,240,.28);}
+.badge-g{background:rgba(82,204,154,.12);color:var(--acc3);border:1px solid rgba(82,204,154,.28);}
+
+/* ── SIMULATOR ───────────────────────────────────────────── */
+.sim{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:18px 0;}
+.sim-controls{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.sim-controls label{font-size:12px;color:var(--muted);}
+.sim-select{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 9px;font-size:12px;cursor:pointer;}
+.sim-btn{padding:6px 16px;background:var(--acc);color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;}
+.sim-btn:hover{background:#8f7ef7;}
+.sim-output{padding:16px;font-family:'Courier New',monospace;font-size:12px;min-height:120px;max-height:320px;overflow-y:auto;}
+.sim-line{padding:2px 0;animation:fadein .15s ease;}
+.sim-line.info{color:var(--acc2);}
+.sim-line.ok{color:var(--acc3);}
+.sim-line.warn{color:var(--acc4);}
+.sim-line.err{color:var(--acc5);}
+.sim-line.dim{color:var(--muted);}
+@keyframes fadein{from{opacity:0;transform:translateY(2px);}to{opacity:1;transform:none;}}
+
+/* ── MISC ────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+hr{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+.check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:5px 0;}
+.check-row::before{content:'✓';color:var(--acc3);font-weight:700;}
+
+@media(max-width:860px){nav{display:none;}main{padding:22px 18px;}}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav id="nav">
+  <div class="nav-head">
+    <a href="index.html">← Back to Learning Hub</a>
+    <h2>API Code Learning</h2>
+    <p>5 lessons · interactive</p>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="nav-progress-label" id="progress-label">0 / 5 complete</div>
+  </div>
+
+  <div class="nav-section">Lessons</div>
+  <a class="lesson-link active" href="#" onclick="goLesson(0);return false;">
+    <div class="lesson-dot active" id="dot-0">1</div> OAuth2 Authentication
+  </a>
+  <a class="lesson-link" href="#" onclick="goLesson(1);return false;">
+    <div class="lesson-dot" id="dot-1">2</div> HTTP Core &amp; Retry
+  </a>
+  <a class="lesson-link" href="#" onclick="goLesson(2);return false;">
+    <div class="lesson-dot" id="dot-2">3</div> Pagination Generator
+  </a>
+  <a class="lesson-link" href="#" onclick="goLesson(3);return false;">
+    <div class="lesson-dot" id="dot-3">4</div> Public API Methods
+  </a>
+  <a class="lesson-link" href="#" onclick="goLesson(4);return false;">
+    <div class="lesson-dot" id="dot-4">5</div> Extractors
+  </a>
+
+  <div class="nav-section" style="margin-top:auto;padding-top:12px;">Files</div>
+  <a class="lesson-link" href="#" style="font-size:11px;">
+    <div class="lesson-dot" style="font-size:8px;border-color:var(--acc2)">📄</div> src/p6_client.py
+  </a>
+  <a class="lesson-link" href="#" style="font-size:11px;">
+    <div class="lesson-dot" style="font-size:8px;border-color:var(--acc3)">📄</div> extractors/*.py
+  </a>
+</nav>
+
+<!-- ════════════════ LESSONS ════════════════ -->
+<main>
+
+<!-- ══════════════════════════════════════════
+     LESSON 0 — OAuth2
+═══════════════════════════════════════════════ -->
+<div class="lesson active" id="lesson-0">
+  <div class="lesson-tag">Lesson 1 of 5</div>
+  <h1>OAuth2 <span>Authentication</span></h1>
+  <p class="intro">The OPC API requires a Bearer token before you can call any endpoint. This lesson walks through every line of the auth code in <code>OPCClient</code>.</p>
+  <div class="badge-row">
+    <span class="badge badge-p">OAuth2 client_credentials</span>
+    <span class="badge badge-b">requests-oauthlib</span>
+    <span class="badge badge-g">Token refresh</span>
+  </div>
+
+  <h2>Why client_credentials?</h2>
+  <p>There are four OAuth2 grant types. <strong>client_credentials</strong> is used for server-to-server (machine-to-machine) communication with no human user involved. The pipeline runs as a background job — it never shows a browser login page.</p>
+
+  <div class="visual">
+    <div class="visual-title">OAuth2 client_credentials flow</div>
+    <div class="flow-row">
+      <div class="flow-box fbox-p">Your App<br><small style="font-weight:400;font-size:10px">client_id + secret</small></div>
+      <div class="flow-arrow">──POST──→</div>
+      <div class="flow-box fbox-b">Oracle IDCS<br><small style="font-weight:400;font-size:10px">/oauth2/v1/token</small></div>
+      <div class="flow-arrow">←── token ──</div>
+      <div class="flow-box fbox-g">access_token<br><small style="font-weight:400;font-size:10px">~15 min TTL</small></div>
+    </div>
+    <div class="flow-row" style="margin-top:14px;">
+      <div class="flow-box fbox-p">Your App</div>
+      <div class="flow-arrow">──GET /projects──→<br><small style="font-size:10px;color:var(--muted)">Authorization: Bearer &lt;token&gt;</small></div>
+      <div class="flow-box fbox-b">OPC REST API v2</div>
+      <div class="flow-arrow">←── JSON data ──</div>
+      <div class="flow-box fbox-g">Records</div>
+    </div>
+  </div>
+
+  <h2>Imports — what each library does</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 9–17</div>
+    <pre><code class="language-python" id="imports-code"><span class="ann-line" data-ann="ann-req" onclick="toggleAnn('ann-req',this)">import requests</span>
+<span class="ann-line" data-ann="ann-oauth" onclick="toggleAnn('ann-oauth',this)">from requests_oauthlib import OAuth2Session</span>
+<span class="ann-line" data-ann="ann-bac" onclick="toggleAnn('ann-bac',this)">from oauthlib.oauth2 import BackendApplicationClient</span>
+<span class="ann-line" data-ann="ann-ten" onclick="toggleAnn('ann-ten',this)">from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)</span></code></pre>
+    <div class="annotation" id="ann-req">
+      <div class="annotation-tag">requests</div>
+      <p><strong>requests</strong> is the standard Python HTTP library. We import it here only for its <code>Timeout</code> and <code>ConnectionError</code> exception classes — used in the retry decorator on <code>_get()</code>.</p>
+    </div>
+    <div class="annotation" id="ann-oauth">
+      <div class="annotation-tag">OAuth2Session</div>
+      <p><strong>OAuth2Session</strong> is a wrapper around a regular <code>requests.Session</code> that automatically attaches the <code>Authorization: Bearer &lt;token&gt;</code> header to every request. You don't need to set it manually.</p>
+    </div>
+    <div class="annotation" id="ann-bac">
+      <div class="annotation-tag">BackendApplicationClient</div>
+      <p><strong>BackendApplicationClient</strong> configures the session to use the <code>client_credentials</code> grant — telling oauthlib "this is a machine, not a human user, no redirect URL needed".</p>
+    </div>
+    <div class="annotation" id="ann-ten">
+      <div class="annotation-tag">tenacity</div>
+      <p><strong>tenacity</strong> is a retry library. These four imports let you decorate a function with <code>@retry(...)</code> to automatically retry on specific exceptions with configurable backoff delays. We'll see this in Lesson 2.</p>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);margin-top:-8px;">👆 Click any line to see an explanation</p>
+
+  <h2>The three auth methods</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 39–56</div>
+    <pre><code class="language-python" id="auth-code"><span class="ann-line" data-ann="ann-cs" onclick="toggleAnn('ann-cs',this)">    def _create_session(self) -> OAuth2Session:</span>
+<span class="ann-line" data-ann="ann-bac2" onclick="toggleAnn('ann-bac2',this)">        client = BackendApplicationClient(client_id=self._cfg["client_id"])</span>
+<span class="ann-line" data-ann="ann-sess" onclick="toggleAnn('ann-sess',this)">        session = OAuth2Session(client=client)</span>
+<span class="ann-line" data-ann="ann-ft0" onclick="toggleAnn('ann-ft0',this)">        self._fetch_token(session)</span>
+        return session
+
+    def _fetch_token(self, session: OAuth2Session) -> None:
+<span class="ann-line" data-ann="ann-ft1" onclick="toggleAnn('ann-ft1',this)">        token = session.fetch_token(
+            token_url=self._cfg["token_url"],
+            client_id=self._cfg["client_id"],
+            client_secret=self._cfg["client_secret"],
+            scope=self._cfg["scope"] or None,
+        )</span>
+<span class="ann-line" data-ann="ann-log" onclick="toggleAnn('ann-log',this)">        logger.info("OPC token acquired", extra={"expires_at": token.get("expires_at")})</span>
+
+    def _ensure_token(self) -> None:
+<span class="ann-line" data-ann="ann-ens" onclick="toggleAnn('ann-ens',this)">        if self._session.token.get("expires_in", 0) &lt; 60:
+            self._fetch_token(self._session)</span></code></pre>
+    <div class="annotation" id="ann-cs">
+      <div class="annotation-tag">_create_session</div>
+      <p>Called once in <code>__init__</code>. Creates the OAuth2-aware session and immediately fetches the first token. The single underscore prefix means "private to this class".</p>
+    </div>
+    <div class="annotation" id="ann-bac2">
+      <div class="annotation-tag">BackendApplicationClient</div>
+      <p>This object configures the OAuth2 grant type. By passing only <code>client_id</code> (no redirect URI, no user scopes), it signals the <code>client_credentials</code> grant — machine-to-machine auth.</p>
+    </div>
+    <div class="annotation" id="ann-sess">
+      <div class="annotation-tag">OAuth2Session(client=...)</div>
+      <p>Wraps <code>requests.Session</code> with the OAuth2 client. From now on, every <code>session.get(url)</code> call will include <code>Authorization: Bearer &lt;token&gt;</code> automatically — you never set the header yourself.</p>
+    </div>
+    <div class="annotation" id="ann-ft0">
+      <div class="annotation-tag">fetch token on creation</div>
+      <p>The token is fetched <em>immediately</em> when the session is created. This is called "eager" initialization — we want to fail fast at startup if credentials are wrong, not halfway through a pipeline run.</p>
+    </div>
+    <div class="annotation" id="ann-ft1">
+      <div class="annotation-tag">session.fetch_token</div>
+      <p>Makes a <code>POST</code> to the <code>token_url</code> with the credentials. Oracle IDCS validates them and returns a JSON response like <code>{"access_token": "...", "expires_in": 900}</code>. The session stores this token internally.</p>
+    </div>
+    <div class="annotation" id="ann-log">
+      <div class="annotation-tag">Structured logging</div>
+      <p>Notice <code>extra={"expires_at": ...}</code>. The JSON logger will include this as a top-level field in the log output — making it queryable in log aggregators like Splunk or CloudWatch.</p>
+    </div>
+    <div class="annotation" id="ann-ens">
+      <div class="annotation-tag">_ensure_token — the refresh guard</div>
+      <p><code>expires_in</code> is the seconds until expiry. If less than <strong>60 seconds</strong> remain, we proactively refresh. This prevents the token from expiring <em>during</em> an API call mid-pipeline — a classic race condition bug.</p>
+    </div>
+  </div>
+
+  <!-- FILL IN BLANK 1 -->
+  <div class="exercise">
+    <div class="exercise-head">
+      <span class="ex-icon">✏️</span>
+      <h3>Fill-in-the-blank: Auth setup</h3>
+      <span class="ex-desc">Click ??? to reveal each answer</span>
+    </div>
+    <div class="exercise-body">
+      <pre><code class="language-python">def _create_session(self) -> OAuth2Session:
+    # 1. Configure the client_credentials grant
+    client = <span class="blank" onclick="revealBlank(this)">BackendApplicationClient</span>(client_id=self._cfg["client_id"])
+
+    # 2. Create an OAuth2-aware HTTP session
+    session = <span class="blank" onclick="revealBlank(this)">OAuth2Session</span>(client=client)
+
+    # 3. Immediately fetch the first access token
+    self.<span class="blank" onclick="revealBlank(this)">_fetch_token</span>(session)
+    return session
+
+def _ensure_token(self) -> None:
+    # 4. Refresh if less than ??? seconds until expiry
+    if self._session.token.get("expires_in", 0) &lt; <span class="blank" onclick="revealBlank(this)">60</span>:
+        self._fetch_token(self._session)</code></pre>
+    </div>
+  </div>
+
+  <!-- QUIZ 1 -->
+  <div class="quiz">
+    <div class="quiz-head"><h3>🧠 Quick Check</h3></div>
+    <div class="quiz-q"><p>Why does <code>_ensure_token()</code> refresh when <code>expires_in &lt; 60</code> rather than <code>expires_in == 0</code>?</p></div>
+    <div class="options" id="q0">
+      <div class="option" onclick="answer(this,'q0',false)"><div class="opt-radio"></div>To save network requests — refreshing early means fewer token calls overall.</div>
+      <div class="option" onclick="answer(this,'q0',true)"><div class="opt-radio"></div>To prevent the token from expiring mid-request — a 60-second buffer covers the time a slow API call might take.</div>
+      <div class="option" onclick="answer(this,'q0',false)"><div class="opt-radio"></div>The OPC API requires tokens to be refreshed every 60 seconds regardless of expiry.</div>
+      <div class="option" onclick="answer(this,'q0',false)"><div class="opt-radio"></div>The <code>expires_in</code> field is unreliable and rounds to the nearest minute.</div>
+    </div>
+    <div class="quiz-feedback" id="q0-fb"></div>
+  </div>
+
+  <div class="lesson-nav">
+    <button class="nav-btn prev" disabled>← Previous</button>
+    <button class="nav-btn next" onclick="goLesson(1)">Next: HTTP Core & Retry →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     LESSON 1 — HTTP Core & Retry
+═══════════════════════════════════════════════ -->
+<div class="lesson" id="lesson-1">
+  <div class="lesson-tag">Lesson 2 of 5</div>
+  <h1>HTTP Core <span>&amp; Retry</span></h1>
+  <p class="intro">Every API call goes through <code>_get()</code>. It handles token refresh, URL construction, and automatic retry on network failures — without retrying on auth errors.</p>
+  <div class="badge-row">
+    <span class="badge badge-p">@retry decorator</span>
+    <span class="badge badge-b">tenacity backoff</span>
+    <span class="badge badge-g">raise_for_status()</span>
+  </div>
+
+  <h2>The <code>_get()</code> method — annotated</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 62–73</div>
+    <pre><code class="language-python"><span class="ann-line" data-ann="ann-retry-dec" onclick="toggleAnn('ann-retry-dec',this)">    @retry(
+        reraise=True,
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=2, min=2, max=30),
+        retry=retry_if_exception_type((requests.Timeout, requests.ConnectionError)),
+    )</span>
+    def _get(self, endpoint: str, params: dict | None = None) -> dict:
+<span class="ann-line" data-ann="ann-ens2" onclick="toggleAnn('ann-ens2',this)">        self._ensure_token()</span>
+<span class="ann-line" data-ann="ann-url" onclick="toggleAnn('ann-url',this)">        url = f"{self._base_url}/{endpoint.lstrip('/')}"</span>
+<span class="ann-line" data-ann="ann-getreq" onclick="toggleAnn('ann-getreq',this)">        response = self._session.get(url, params=params, timeout=self._timeout)</span>
+<span class="ann-line" data-ann="ann-rfs" onclick="toggleAnn('ann-rfs',this)">        response.raise_for_status()</span>
+<span class="ann-line" data-ann="ann-json" onclick="toggleAnn('ann-json',this)">        return response.json()</span>
+    </code></pre>
+    <div class="annotation" id="ann-retry-dec">
+      <div class="annotation-tag">@retry decorator — unpacked</div>
+      <p>
+        <strong>reraise=True</strong> — after all retries fail, re-raise the original exception (not a tenacity wrapper).<br>
+        <strong>stop_after_attempt(3)</strong> — try at most 3 times total.<br>
+        <strong>wait_exponential(multiplier=2, min=2, max=30)</strong> — wait 2s after attempt 1, 4s after attempt 2, capped at 30s.<br>
+        <strong>retry_if_exception_type(Timeout, ConnectionError)</strong> — ONLY retry on <em>network</em> errors. A 401 Unauthorized or 404 Not Found will NOT be retried — they're bugs, not transient failures.
+      </p>
+    </div>
+    <div class="annotation" id="ann-ens2">
+      <div class="annotation-tag">_ensure_token() first</div>
+      <p>Called <em>before every request</em> — even on retries. If the token expired during the wait between retries, this will refresh it transparently before the next attempt.</p>
+    </div>
+    <div class="annotation" id="ann-url">
+      <div class="annotation-tag">URL construction</div>
+      <p><code>rstrip("/")</code> on the base URL + <code>lstrip("/")</code> on the endpoint prevents double slashes. So both <code>"projects"</code> and <code>"/projects"</code> produce the same correct URL: <code>https://tenant.../ppmrestapi/v2/projects</code>.</p>
+    </div>
+    <div class="annotation" id="ann-getreq">
+      <div class="annotation-tag">session.get() — not requests.get()</div>
+      <p>We use <code>self._session</code> (an <code>OAuth2Session</code>), not the global <code>requests.get()</code>. The session automatically adds the <code>Authorization: Bearer ...</code> header and can reuse TCP connections (connection pooling).</p>
+    </div>
+    <div class="annotation" id="ann-rfs">
+      <div class="annotation-tag">raise_for_status()</div>
+      <p>Converts HTTP error codes into Python exceptions. <code>4xx</code> → <code>HTTPError</code> (client error). <code>5xx</code> → <code>HTTPError</code> (server error). A <code>200 OK</code> does nothing. This ensures errors are never silently swallowed.</p>
+    </div>
+    <div class="annotation" id="ann-json">
+      <div class="annotation-tag">response.json()</div>
+      <p>Parses the response body as JSON and returns a Python dict or list. OPC returns either a plain list of records, or <code>{"items": [...], "total": N}</code> — the <code>_paginate()</code> method handles both shapes.</p>
+    </div>
+  </div>
+
+  <h2>Retry Timeline — visualized</h2>
+  <div class="visual">
+    <div class="visual-title">Retry sequence when server times out (Timeout error)</div>
+    <div class="timeline">
+      <div class="tl-event"><div class="tl-dot attempt"></div><div class="tl-label">Attempt 1<br>t=0s</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-event"><div class="tl-dot wait"></div><div class="tl-label">Wait<br>2s</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-event"><div class="tl-dot attempt"></div><div class="tl-label">Attempt 2<br>t=2s</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-event"><div class="tl-dot wait"></div><div class="tl-label">Wait<br>4s</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-event"><div class="tl-dot attempt"></div><div class="tl-label">Attempt 3<br>t=6s</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-event"><div class="tl-dot fail"></div><div class="tl-label">Raise<br>Error</div></div>
+    </div>
+    <p style="margin-top:14px;font-size:12px;">If attempt 2 <em>succeeds</em>, the chain stops there — no more retries needed. The function returns normally.</p>
+    <hr style="margin:14px 0;border-color:var(--border);">
+    <div class="visual-title" style="margin-top:0">What is NOT retried</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-size:11px;color:var(--acc5);font-weight:700;margin-bottom:6px;">❌ NOT RETRIED</div>
+        <div class="check-row" style="color:var(--acc5);"><span style="color:var(--acc5);">401</span> Unauthorized</div>
+        <div class="check-row" style="color:var(--acc5);">403 Forbidden</div>
+        <div class="check-row" style="color:var(--acc5);">404 Not Found</div>
+        <div class="check-row" style="color:var(--acc5);">500 Server Error</div>
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <div style="font-size:11px;color:var(--acc3);font-weight:700;margin-bottom:6px;">✓ RETRIED</div>
+        <div class="check-row">requests.Timeout</div>
+        <div class="check-row">requests.ConnectionError</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Why not retry on HTTP errors (4xx/5xx)?</strong>
+    <p>A 401 means your credentials are wrong — retrying won't help. A 500 might be a bug in the server — retrying might make it worse. We only retry on <em>transient network failures</em> (timeout, dropped connection) where retrying actually makes sense.</p>
+  </div>
+
+  <!-- SIMULATOR -->
+  <h2>🔬 Retry Simulator</h2>
+  <p>Simulate what happens when the OPC API is unreliable:</p>
+  <div class="sim">
+    <div class="sim-controls">
+      <label>Fail mode:</label>
+      <select class="sim-select" id="sim-mode">
+        <option value="timeout2">Timeout on attempts 1 & 2, success on 3</option>
+        <option value="timeout3">Timeout all 3 attempts (total failure)</option>
+        <option value="success">All attempts succeed immediately</option>
+        <option value="http401">401 Unauthorized (no retry)</option>
+        <option value="http500">500 Server Error (no retry)</option>
+      </select>
+      <button class="sim-btn" onclick="runSim()">▶ Run</button>
+    </div>
+    <div class="sim-output" id="sim-out">
+      <div class="sim-line dim">Select a mode and click Run...</div>
+    </div>
+  </div>
+
+  <!-- FILL IN BLANK 2 -->
+  <div class="exercise">
+    <div class="exercise-head">
+      <span class="ex-icon">✏️</span>
+      <h3>Fill-in-the-blank: Retry decorator</h3>
+      <span class="ex-desc">Click ??? to reveal</span>
+    </div>
+    <div class="exercise-body">
+      <pre><code class="language-python">@retry(
+    reraise=<span class="blank" onclick="revealBlank(this)">True</span>,                       # re-raise original exception after all retries
+    stop=stop_after_attempt(<span class="blank" onclick="revealBlank(this)">3</span>),        # max 3 total attempts
+    wait=wait_exponential(multiplier=<span class="blank" onclick="revealBlank(this)">2</span>, min=2, max=30),
+    retry=retry_if_exception_type((<span class="blank" onclick="revealBlank(this)">requests.Timeout</span>, requests.ConnectionError)),
+)</code></pre>
+    </div>
+  </div>
+
+  <!-- QUIZ 2 -->
+  <div class="quiz">
+    <div class="quiz-head"><h3>🧠 Quick Check</h3></div>
+    <div class="quiz-q"><p>If OPC returns a <code>401 Unauthorized</code> response, what does <code>_get()</code> do?</p></div>
+    <div class="options" id="q1">
+      <div class="option" onclick="answer(this,'q1',false)"><div class="opt-radio"></div>Retries up to 3 times with exponential backoff.</div>
+      <div class="option" onclick="answer(this,'q1',false)"><div class="opt-radio"></div>Refreshes the OAuth2 token and retries once.</div>
+      <div class="option" onclick="answer(this,'q1',true)"><div class="opt-radio"></div>Raises an <code>HTTPError</code> immediately — 401 is not in the retry exception list.</div>
+      <div class="option" onclick="answer(this,'q1',false)"><div class="opt-radio"></div>Returns an empty list and logs a warning.</div>
+    </div>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="lesson-nav">
+    <button class="nav-btn prev" onclick="goLesson(0)">← OAuth2 Auth</button>
+    <button class="nav-btn next" onclick="goLesson(2)">Next: Pagination Generator →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     LESSON 2 — Pagination
+═══════════════════════════════════════════════ -->
+<div class="lesson" id="lesson-2">
+  <div class="lesson-tag">Lesson 3 of 5</div>
+  <h1>Pagination <span>Generator</span></h1>
+  <p class="intro">The OPC API returns max 500 records per request. <code>_paginate()</code> is a Python generator that lazily fetches page after page until no records remain.</p>
+  <div class="badge-row">
+    <span class="badge badge-p">Python generator (yield)</span>
+    <span class="badge badge-b">OPC filter syntax</span>
+    <span class="badge badge-g">Lazy evaluation</span>
+  </div>
+
+  <h2>How OPC pagination works</h2>
+  <div class="visual">
+    <div class="visual-title">Fetching 1,200 projects with page_size=500</div>
+    <div class="pages">
+      <div class="page-box">
+        <div class="pg-label">Request 1</div>
+        <div class="pg-num">500 records</div>
+        <div class="pg-off">offset=0</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="page-box">
+        <div class="pg-label">Request 2</div>
+        <div class="pg-num">500 records</div>
+        <div class="pg-off">offset=500</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="page-box last">
+        <div class="pg-label">Request 3 (last)</div>
+        <div class="pg-num">200 records</div>
+        <div class="pg-off">offset=1000</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:12px;">The generator <strong>stops</strong> when a page returns fewer records than <code>page_size</code> (200 &lt; 500).</p>
+  </div>
+
+  <h2><code>_paginate()</code> — annotated</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 75–96</div>
+    <pre><code class="language-python">    def _paginate(
+        self, endpoint: str, fields: list[str], extra_filter: str | None = None
+    ) -> Generator[list[dict], None, None]:
+<span class="ann-line" data-ann="ann-gen-doc" onclick="toggleAnn('ann-gen-doc',this)">        """Yield pages of records from a paginated OPC endpoint."""</span>
+<span class="ann-line" data-ann="ann-offset" onclick="toggleAnn('ann-offset',this)">        offset = 0</span>
+<span class="ann-line" data-ann="ann-fstr" onclick="toggleAnn('ann-fstr',this)">        field_str = ",".join(fields)</span>
+        while True:
+<span class="ann-line" data-ann="ann-params" onclick="toggleAnn('ann-params',this)">            params: dict = {
+                "fields": field_str,
+                "limit": self._page_size,
+                "offset": offset,
+            }</span>
+<span class="ann-line" data-ann="ann-filt" onclick="toggleAnn('ann-filt',this)">            if extra_filter:
+                params["filter"] = extra_filter</span>
+<span class="ann-line" data-ann="ann-getp" onclick="toggleAnn('ann-getp',this)">            data = self._get(endpoint, params=params)
+            records = data if isinstance(data, list) else data.get("items", [])</span>
+<span class="ann-line" data-ann="ann-break1" onclick="toggleAnn('ann-break1',this)">            if not records:
+                break</span>
+<span class="ann-line" data-ann="ann-yield" onclick="toggleAnn('ann-yield',this)">            yield records</span>
+<span class="ann-line" data-ann="ann-break2" onclick="toggleAnn('ann-break2',this)">            if len(records) &lt; self._page_size:
+                break</span>
+<span class="ann-line" data-ann="ann-inc" onclick="toggleAnn('ann-inc',this)">            offset += self._page_size</span>
+    </code></pre>
+    <div class="annotation" id="ann-gen-doc">
+      <div class="annotation-tag">Return type: Generator</div>
+      <p><code>Generator[list[dict], None, None]</code> means: yields <code>list[dict]</code>, the <code>send()</code> type is None, and the return value is None. This is the standard type hint for a generator that only yields, never receives values.</p>
+    </div>
+    <div class="annotation" id="ann-offset">
+      <div class="annotation-tag">offset — page cursor</div>
+      <p>Starts at 0. After each full page of 500 records, it increments by 500. This is how the OPC API knows which "window" of data to return: page 1 = records 0–499, page 2 = 500–999, etc.</p>
+    </div>
+    <div class="annotation" id="ann-fstr">
+      <div class="annotation-tag">fields — comma-separated string</div>
+      <p>The OPC API requires fields as a single comma-separated string in the query param: <code>?fields=ObjectId,Name,Status</code>. We join the list here once, outside the loop, to avoid repeated string work.</p>
+    </div>
+    <div class="annotation" id="ann-params">
+      <div class="annotation-tag">Query parameters</div>
+      <p>These become URL query params: <code>?fields=ObjectId,Name&limit=500&offset=0</code>. The <code>requests</code> library URL-encodes them automatically when passed to <code>session.get(url, params=params)</code>.</p>
+    </div>
+    <div class="annotation" id="ann-filt">
+      <div class="annotation-tag">OPC filter syntax</div>
+      <p>OPC uses its own filter DSL: <code>Status IN ("Active", "What-if")</code> or <code>ProjectObjectId = 1001</code>. It's added as <code>&filter=...</code> to the URL. Not all endpoints support all filter operators — check the OPC API docs.</p>
+    </div>
+    <div class="annotation" id="ann-getp">
+      <div class="annotation-tag">Response shape normalization</div>
+      <p>Some OPC endpoints return a plain list: <code>[{...}, {...}]</code>. Others return a wrapper object: <code>{"items": [{...}], "total": 47}</code>. This one-liner handles both shapes: if it's already a list, use it directly; otherwise extract <code>"items"</code>.</p>
+    </div>
+    <div class="annotation" id="ann-break1">
+      <div class="annotation-tag">Empty response = done</div>
+      <p>If the API returns an empty list (we've gone past the last record), break out of the loop immediately. This handles edge cases like a project with zero WBS nodes.</p>
+    </div>
+    <div class="annotation" id="ann-yield">
+      <div class="annotation-tag">yield — the generator magic</div>
+      <p><code>yield records</code> pauses the function and hands the current page to the caller. Execution resumes from here when the caller asks for the next value. The HTTP connection stays alive between yields. Nothing is buffered in memory beyond one page at a time.</p>
+    </div>
+    <div class="annotation" id="ann-break2">
+      <div class="annotation-tag">Partial page = last page</div>
+      <p>If we got <em>fewer</em> records than <code>page_size</code>, this is the last page — no need to make another API call. Break immediately after yielding.</p>
+    </div>
+    <div class="annotation" id="ann-inc">
+      <div class="annotation-tag">Advance the cursor</div>
+      <p>Only reached when the current page was <em>full</em> (500 records). Increment offset by <code>page_size</code> to request the next window of records.</p>
+    </div>
+  </div>
+
+  <h2><code>_get_all()</code> — collects everything</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 98–104</div>
+    <pre><code class="language-python">    def _get_all(self, endpoint: str, fields: list[str],
+                 extra_filter: str | None = None) -> list[dict]:
+        """Collect all paginated records into a single list."""
+        result: list[dict] = []
+<span class="ann-line" data-ann="ann-getall" onclick="toggleAnn('ann-getall',this)">        for page in self._paginate(endpoint, fields, extra_filter):
+            result.extend(page)</span>
+        logger.info("Fetched records", extra={"endpoint": endpoint, "count": len(result)})
+        return result
+    </code></pre>
+    <div class="annotation" id="ann-getall">
+      <div class="annotation-tag">Generator consumption</div>
+      <p>The <code>for page in self._paginate(...)</code> loop drives the generator. Each iteration triggers the next API call. <code>result.extend(page)</code> appends each page's records to the growing list. After the loop, <code>result</code> contains every record from every page.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <strong>Generator vs. list — why does it matter?</strong>
+    <ul>
+      <li>A list-based approach would fetch ALL pages first, then return — storing everything in memory at once.</li>
+      <li>A generator yields one page at a time. If a downstream task can process page 1 while page 2 is fetching, you get true streaming. It also means you can <code>break</code> early and never fetch remaining pages.</li>
+      <li>For 50,000 activities, this is the difference between loading ~40MB into RAM all at once vs. processing 500 records at a time.</li>
+    </ul>
+  </div>
+
+  <!-- FILL IN BLANK 3 -->
+  <div class="exercise">
+    <div class="exercise-head">
+      <span class="ex-icon">✏️</span>
+      <h3>Fill-in-the-blank: Pagination</h3>
+      <span class="ex-desc">Click ??? to reveal</span>
+    </div>
+    <div class="exercise-body">
+      <pre><code class="language-python">def _paginate(self, endpoint, fields, extra_filter=None):
+    offset = <span class="blank" onclick="revealBlank(this)">0</span>                     # start from the beginning
+    field_str = <span class="blank" onclick="revealBlank(this)">",".join(fields)</span>   # OPC expects comma-separated string
+    while True:
+        params = {"fields": field_str, "limit": self._page_size,
+                  "offset": <span class="blank" onclick="revealBlank(this)">offset</span>}
+        data = self._get(endpoint, params=params)
+        records = data if isinstance(data, list) else data.get(<span class="blank" onclick="revealBlank(this)">"items"</span>, [])
+        if not records:
+            break
+        <span class="blank" onclick="revealBlank(this)">yield</span> records               # pause here, hand page to caller
+        if len(records) &lt; self._page_size:
+            break                      # partial page = last page
+        offset += <span class="blank" onclick="revealBlank(this)">self._page_size</span>   # advance cursor</code></pre>
+    </div>
+  </div>
+
+  <!-- QUIZ 3 -->
+  <div class="quiz">
+    <div class="quiz-head"><h3>🧠 Quick Check</h3></div>
+    <div class="quiz-q"><p>A project has exactly 500 activities. How many HTTP requests does <code>_get_all("activities", ...)</code> make?</p></div>
+    <div class="options" id="q2">
+      <div class="option" onclick="answer(this,'q2',false)"><div class="opt-radio"></div>1 request — 500 records fit in one page.</div>
+      <div class="option" onclick="answer(this,'q2',true)"><div class="opt-radio"></div>2 requests — the first returns 500 (full page, so it tries again), the second returns 0 (empty, breaks).</div>
+      <div class="option" onclick="answer(this,'q2',false)"><div class="opt-radio"></div>3 requests — the generator always makes an extra confirmation call.</div>
+      <div class="option" onclick="answer(this,'q2',false)"><div class="opt-radio"></div>It depends on the network latency.</div>
+    </div>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="lesson-nav">
+    <button class="nav-btn prev" onclick="goLesson(1)">← HTTP Core & Retry</button>
+    <button class="nav-btn next" onclick="goLesson(3)">Next: Public API Methods →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     LESSON 3 — Public API Methods
+═══════════════════════════════════════════════ -->
+<div class="lesson" id="lesson-3">
+  <div class="lesson-tag">Lesson 4 of 5</div>
+  <h1>Public <span>API Methods</span></h1>
+  <p class="intro">Six public methods wrap the private pagination machinery. Each maps to one OPC REST endpoint and returns a clean Python list.</p>
+  <div class="badge-row">
+    <span class="badge badge-p">OPC filter DSL</span>
+    <span class="badge badge-b">REST endpoints</span>
+    <span class="badge badge-g">Context manager</span>
+  </div>
+
+  <h2>Endpoint map</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Method</th><th>OPC Endpoint</th><th>Scope</th><th>Filter example</th></tr>
+      <tr><td>get_projects(status_filter)</td><td>/projects</td><td>Tenant-wide</td><td><code>Status IN ("Active","What-if")</code></td></tr>
+      <tr><td>get_wbs(project_object_id)</td><td>/wbs</td><td>Per-project</td><td><code>ProjectObjectId = 1001</code></td></tr>
+      <tr><td>get_activities(project_object_id)</td><td>/activities</td><td>Per-project</td><td><code>ProjectObjectId = 1001</code></td></tr>
+      <tr><td>get_resource_assignments(project_object_id)</td><td>/activityresourceassignments</td><td>Per-project</td><td><code>ProjectObjectId = 1001</code></td></tr>
+      <tr><td>get_resources()</td><td>/resources</td><td>Tenant-wide</td><td>—</td></tr>
+      <tr><td>get_roles()</td><td>/roles</td><td>Tenant-wide</td><td>—</td></tr>
+    </table>
+  </div>
+
+  <h2>The actual code — annotated</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 110–143</div>
+    <pre><code class="language-python"><span class="ann-line" data-ann="ann-gp" onclick="toggleAnn('ann-gp',this)">    def get_projects(self, status_filter: list[str] | None = None) -> list[dict]:</span>
+        fields = self._cfg["fields"]["project_fields"]
+<span class="ann-line" data-ann="ann-filter-build" onclick="toggleAnn('ann-filter-build',this)">        f = None
+        if status_filter:
+            statuses = ",".join(f'"{s}"' for s in status_filter)
+            f = f"Status IN ({statuses})"</span>
+        return self._get_all("projects", fields, extra_filter=f)
+
+<span class="ann-line" data-ann="ann-gwbs" onclick="toggleAnn('ann-gwbs',this)">    def get_wbs(self, project_object_id: int) -> list[dict]:
+        fields = self._cfg["fields"]["wbs_fields"]
+        return self._get_all("wbs", fields,
+            extra_filter=f"ProjectObjectId = {project_object_id}")</span>
+
+    def get_activities(self, project_object_id: int) -> list[dict]:
+        fields = self._cfg["fields"]["activity_fields"]
+        return self._get_all("activities", fields,
+            extra_filter=f"ProjectObjectId = {project_object_id}")
+
+    def get_resource_assignments(self, project_object_id: int) -> list[dict]:
+        fields = self._cfg["fields"]["resource_assignment_fields"]
+        return self._get_all("activityresourceassignments", fields,
+            extra_filter=f"ProjectObjectId = {project_object_id}")
+
+<span class="ann-line" data-ann="ann-gres" onclick="toggleAnn('ann-gres',this)">    def get_resources(self) -> list[dict]:
+        fields = self._cfg["fields"]["resource_fields"]
+        return self._get_all("resources", fields)</span>
+
+<span class="ann-line" data-ann="ann-groles" onclick="toggleAnn('ann-groles',this)">    def get_roles(self) -> list[dict]:
+        role_fields = ["ObjectId", "Id", "Name", "PricePerUnit",
+                       "UnitOfMeasure", "IsActive"]
+        return self._get_all("roles", role_fields)</span>
+    </code></pre>
+    <div class="annotation" id="ann-gp">
+      <div class="annotation-tag">get_projects — optional filter</div>
+      <p>The <code>status_filter=None</code> default means "fetch all projects". When called with <code>["Active", "What-if"]</code>, it builds a filter string. The fields list comes from <code>config.yaml</code> so it can be changed without touching code.</p>
+    </div>
+    <div class="annotation" id="ann-filter-build">
+      <div class="annotation-tag">Building the OPC filter string</div>
+      <p>OPC expects: <code>Status IN ("Active","What-if")</code>. The generator expression <code>f'"{s}"'</code> wraps each status in double quotes, then <code>",".join(...)</code> produces <code>"Active","What-if"</code>. Finally the f-string wraps it in <code>IN (...)</code>.</p>
+    </div>
+    <div class="annotation" id="ann-gwbs">
+      <div class="annotation-tag">get_wbs — per-project scope</div>
+      <p>WBS nodes belong to exactly one project. The filter <code>ProjectObjectId = 1001</code> limits the OPC query server-side. This is much more efficient than fetching all WBS nodes and filtering in Python.</p>
+    </div>
+    <div class="annotation" id="ann-gres">
+      <div class="annotation-tag">get_resources — no filter</div>
+      <p>Resources (employees, equipment) are tenant-wide master data — not scoped per project. A resource can be assigned to multiple projects, so we fetch the complete list once.</p>
+    </div>
+    <div class="annotation" id="ann-groles">
+      <div class="annotation-tag">get_roles — hardcoded fields</div>
+      <p>Role fields are hardcoded here instead of coming from config because roles have a stable, small schema that doesn't need configuration flexibility. This is a valid tradeoff for simpler code.</p>
+    </div>
+  </div>
+
+  <h2>Context Manager Pattern</h2>
+  <div class="code-block">
+    <div class="code-label">src/p6_client.py — lines 144–151</div>
+    <pre><code class="language-python"><span class="ann-line" data-ann="ann-close" onclick="toggleAnn('ann-close',this)">    def close(self) -> None:
+        self._session.close()</span>
+
+<span class="ann-line" data-ann="ann-enter" onclick="toggleAnn('ann-enter',this)">    def __enter__(self) -> "OPCClient":
+        return self</span>
+
+<span class="ann-line" data-ann="ann-exit" onclick="toggleAnn('ann-exit',this)">    def __exit__(self, *_: Any) -> None:
+        self.close()</span>
+
+# This enables the "with" statement:
+with OPCClient(config) as client:
+    projects = client.get_projects()
+# session.close() called automatically here, even if an exception occurred
+    </code></pre>
+    <div class="annotation" id="ann-close">
+      <div class="annotation-tag">close()</div>
+      <p>Closes the underlying <code>OAuth2Session</code> (which inherits from <code>requests.Session</code>). This releases the TCP connection pool, cleaning up file descriptors and network resources. Important in long-running Airflow workers.</p>
+    </div>
+    <div class="annotation" id="ann-enter">
+      <div class="annotation-tag">__enter__</div>
+      <p>Returns <code>self</code> — the OPCClient instance. This is what's assigned to the <code>as client</code> variable in <code>with OPCClient() as client:</code>. Called when the <code>with</code> block begins.</p>
+    </div>
+    <div class="annotation" id="ann-exit">
+      <div class="annotation-tag">__exit__</div>
+      <p>Called when the <code>with</code> block exits — whether normally or via exception. The <code>*_</code> absorbs the exception type/value/traceback arguments (we don't need them since we always just close). Returning <code>None</code> (implicitly) means exceptions are re-raised.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <strong>Always use the context manager</strong>
+    <p>Use <code>with OPCClient() as client:</code> instead of creating a client and calling <code>close()</code> manually. The <code>with</code> statement guarantees cleanup even if an exception occurs inside the block — you can't accidentally leak a connection.</p>
+  </div>
+
+  <!-- FILL IN BLANK 4 -->
+  <div class="exercise">
+    <div class="exercise-head">
+      <span class="ex-icon">✏️</span>
+      <h3>Fill-in-the-blank: Filter builder</h3>
+      <span class="ex-desc">Click ??? to reveal</span>
+    </div>
+    <div class="exercise-body">
+      <pre><code class="language-python">def get_projects(self, status_filter=None):
+    fields = self._cfg["fields"]["project_fields"]
+    f = None
+    if status_filter:
+        # Wrap each status in double quotes, join with comma
+        statuses = ",".join(<span class="blank" onclick="revealBlank(this)">f'"{s}"' for s in status_filter</span>)
+        # Build OPC filter: Status IN ("Active","What-if")
+        f = f"<span class="blank" onclick="revealBlank(this)">Status IN</span> ({statuses})"
+    return self._get_all(<span class="blank" onclick="revealBlank(this)">"projects"</span>, fields, extra_filter=f)
+
+def get_wbs(self, project_object_id: int):
+    fields = self._cfg["fields"]["wbs_fields"]
+    return self._get_all("wbs", fields,
+        extra_filter=f"<span class="blank" onclick="revealBlank(this)">ProjectObjectId = {project_object_id}</span>")</code></pre>
+    </div>
+  </div>
+
+  <!-- QUIZ 4 -->
+  <div class="quiz">
+    <div class="quiz-head"><h3>🧠 Quick Check</h3></div>
+    <div class="quiz-q"><p>Why does <code>get_wbs()</code> take a single <code>project_object_id</code> rather than fetching all WBS tenant-wide like <code>get_resources()</code>?</p></div>
+    <div class="options" id="q3">
+      <div class="option" onclick="answer(this,'q3',false)"><div class="opt-radio"></div>The OPC API doesn't support tenant-wide WBS queries — it's a technical limitation.</div>
+      <div class="option" onclick="answer(this,'q3',true)"><div class="opt-radio"></div>WBS nodes belong to a specific project, so filtering by project at the API level avoids downloading irrelevant nodes from other projects.</div>
+      <div class="option" onclick="answer(this,'q3',false)"><div class="opt-radio"></div>WBS requires a different authentication scope than other endpoints.</div>
+      <div class="option" onclick="answer(this,'q3',false)"><div class="opt-radio"></div>Tenant-wide WBS would return duplicate records due to naming conflicts.</div>
+    </div>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="lesson-nav">
+    <button class="nav-btn prev" onclick="goLesson(2)">← Pagination Generator</button>
+    <button class="nav-btn next" onclick="goLesson(4)">Next: Extractors →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     LESSON 4 — Extractors
+═══════════════════════════════════════════════ -->
+<div class="lesson" id="lesson-4">
+  <div class="lesson-tag">Lesson 5 of 5</div>
+  <h1>The <span>Extractors</span></h1>
+  <p class="intro">Three extractor classes sit between the raw <code>OPCClient</code> and the rest of the pipeline. They orchestrate multi-entity fetches, log progress, and return clean data dictionaries.</p>
+  <div class="badge-row">
+    <span class="badge badge-p">ProjectExtractor</span>
+    <span class="badge badge-b">CostExtractor</span>
+    <span class="badge badge-g">ResourceExtractor</span>
+  </div>
+
+  <h2>Why a separate extractor layer?</h2>
+  <div class="callout callout-tip">
+    <strong>Single Responsibility Principle</strong>
+    <p><code>OPCClient</code> knows about HTTP, OAuth2, and pagination. Extractors know about <em>business logic</em>: which projects to include, how to loop per-project, and what to log. Separating these makes each class simpler to test, modify, and understand.</p>
+  </div>
+
+  <h2>ProjectExtractor — annotated</h2>
+  <div class="code-block">
+    <div class="code-label">src/extractors/project_extractor.py</div>
+    <pre><code class="language-python">class ProjectExtractor:
+<span class="ann-line" data-ann="ann-pe-init" onclick="toggleAnn('ann-pe-init',this)">    def __init__(self, client: OPCClient, status_filter: list[str] | None = None):
+        self._client = client
+        self._status_filter = status_filter or ["Active", "What-if"]</span>
+
+<span class="ann-line" data-ann="ann-pe-ep" onclick="toggleAnn('ann-pe-ep',this)">    def extract_projects(self) -> list[dict]:
+        logger.info("Extracting projects", extra={"status_filter": self._status_filter})
+        projects = self._client.get_projects(self._status_filter)
+        logger.info("Projects extracted", extra={"count": len(projects)})
+        return projects</span>
+
+<span class="ann-line" data-ann="ann-pe-wbs" onclick="toggleAnn('ann-pe-wbs',this)">    def extract_wbs(self, project_ids: list[int]) -> list[dict]:
+        all_wbs: list[dict] = []
+        for pid in project_ids:
+            wbs = self._client.get_wbs(pid)
+            all_wbs.extend(wbs)
+            logger.debug("WBS fetched", extra={"project_id": pid, "wbs_count": len(wbs)})
+        logger.info("WBS extraction complete", extra={"total": len(all_wbs)})
+        return all_wbs</span>
+
+<span class="ann-line" data-ann="ann-pe-all" onclick="toggleAnn('ann-pe-all',this)">    def extract_all(self) -> dict[str, list[dict]]:
+        projects  = self.extract_projects()
+        project_ids = [p["ObjectId"] for p in projects]
+        wbs       = self.extract_wbs(project_ids)
+        activities = self.extract_activities(project_ids)
+        return {
+            "projects": projects,
+            "wbs": wbs,
+            "activities": activities,
+        }</span>
+    </code></pre>
+    <div class="annotation" id="ann-pe-init">
+      <div class="annotation-tag">Constructor — dependency injection</div>
+      <p><code>OPCClient</code> is passed in, not created internally. This is <strong>dependency injection</strong>: the caller controls the client (with its credentials/config), and the extractor just uses it. This makes it trivial to pass a mock client in tests without any patching.</p>
+    </div>
+    <div class="annotation" id="ann-pe-ep">
+      <div class="annotation-tag">extract_projects — book-ended logging</div>
+      <p>One <code>logger.info</code> before and one after the actual call. The first tells you "we're starting, with these parameters". The second tells you "we finished, got N records". This pattern makes pipeline logs easy to debug when something hangs or returns 0 records.</p>
+    </div>
+    <div class="annotation" id="ann-pe-wbs">
+      <div class="annotation-tag">extract_wbs — per-project loop</div>
+      <p>WBS nodes are fetched one project at a time (the OPC API requires a project filter). <code>all_wbs.extend(wbs)</code> flattens the per-project lists into one combined list. The <code>logger.debug</code> inside the loop gives per-project counts for fine-grained tracing.</p>
+    </div>
+    <div class="annotation" id="ann-pe-all">
+      <div class="annotation-tag">extract_all — orchestrator method</div>
+      <p>Convenience method that runs the full sequence. Notice the <strong>dependency chain</strong>: projects must be fetched first to get the <code>project_ids</code>, which are then used to fetch WBS and activities. This is explicit ordering — not concurrent.</p>
+    </div>
+  </div>
+
+  <h2>CostExtractor — field filtering</h2>
+  <div class="code-block">
+    <div class="code-label">src/extractors/cost_extractor.py</div>
+    <pre><code class="language-python"><span class="ann-line" data-ann="ann-ce-const" onclick="toggleAnn('ann-ce-const',this)">_EV_SPREAD_FIELDS = [
+    "ProjectObjectId", "StartDate", "FinishDate",
+    "PlannedValue", "EarnedValue", "ActualCost",
+    "BudgetAtCompletion", "PlannedDuration",
+    "ActualDuration", "RemainingDuration",
+]</span>
+
+class CostExtractor:
+    def extract_project_cost(self, projects: list[dict]) -> list[dict]:
+        cost_fields = [
+            "ObjectId", "Id", "Name", "DataDate",
+            "TotalBudgetedCost", "ActualTotalCost",
+            "EarnedValueCost", "PlannedValueCost",
+            "CostPerformanceIndex", "SchedulePerformanceIndex",
+            "EstimateAtCompletion", "BudgetAtCompletion", "SummaryBudget",
+        ]
+<span class="ann-line" data-ann="ann-ce-dict" onclick="toggleAnn('ann-ce-dict',this)">        records = []
+        for p in projects:
+            record = {k: p.get(k) for k in cost_fields}
+            records.append(record)
+        return records</span>
+
+    def extract_activity_cost(self, activities: list[dict]) -> list[dict]:
+        cost_fields = [
+            "ObjectId", "ProjectObjectId", "WBSObjectId", "Id", "Name",
+            "PlannedTotalCost", "ActualTotalCost", "BudgetAtCompletion",
+            "EarnedValueCost", "PlannedDuration", "RemainingDuration",
+            "PercentComplete", "PlannedStartDate", "PlannedFinishDate",
+            "ActualStartDate", "ActualFinishDate", "Status",
+        ]
+<span class="ann-line" data-ann="ann-ce-get" onclick="toggleAnn('ann-ce-get',this)">        return [{k: a.get(k) for k in cost_fields} for a in activities]</span>
+    </code></pre>
+    <div class="annotation" id="ann-ce-const">
+      <div class="annotation-tag">Module-level constant</div>
+      <p><code>_EV_SPREAD_FIELDS</code> is a module-level constant (underscore = "private to this module"). It lists EV spread fields available in OPC for period-level data — distinct from the project-level fields extracted in <code>extract_project_cost</code>. These could be used for future period-level EV time series extraction.</p>
+    </div>
+    <div class="annotation" id="ann-ce-dict">
+      <div class="annotation-tag">Dict comprehension with .get()</div>
+      <p><code>{k: p.get(k) for k in cost_fields}</code> creates a new dict with only the keys we care about. Using <code>.get(k)</code> instead of <code>p[k]</code> is critical — if OPC doesn't return a field for a particular project (e.g., no budget set), <code>.get()</code> returns <code>None</code> instead of raising <code>KeyError</code>.</p>
+    </div>
+    <div class="annotation" id="ann-ce-get">
+      <div class="annotation-tag">List comprehension shorthand</div>
+      <p>Exactly the same logic as the for-loop above, but written as a one-liner list comprehension. Both are equivalent — use whichever is more readable for the team. The list comprehension is slightly faster in CPython due to bytecode optimization.</p>
+    </div>
+  </div>
+
+  <h2>ResourceExtractor</h2>
+  <div class="code-block">
+    <div class="code-label">src/extractors/resource_extractor.py</div>
+    <pre><code class="language-python">class ResourceExtractor:
+    def __init__(self, client: OPCClient):
+        self._client = client
+
+<span class="ann-line" data-ann="ann-re-res" onclick="toggleAnn('ann-re-res',this)">    def extract_resources(self) -> list[dict]:
+        resources = self._client.get_resources()   # Tenant-wide
+        logger.info("Resources extracted", extra={"count": len(resources)})
+        return resources
+
+    def extract_roles(self) -> list[dict]:
+        roles = self._client.get_roles()
+        logger.info("Roles extracted", extra={"count": len(roles)})
+        return roles</span>
+
+<span class="ann-line" data-ann="ann-re-asgn" onclick="toggleAnn('ann-re-asgn',this)">    def extract_assignments(self, project_ids: list[int]) -> list[dict]:
+        all_assignments: list[dict] = []
+        for pid in project_ids:
+            assignments = self._client.get_resource_assignments(pid)
+            all_assignments.extend(assignments)
+            logger.debug("Assignments fetched",
+                extra={"project_id": pid, "count": len(assignments)})
+        logger.info("All assignments extracted", extra={"total": len(all_assignments)})
+        return all_assignments</span>
+
+    def extract_all(self, project_ids: list[int]) -> dict:
+        return {
+            "resources":            self.extract_resources(),
+            "roles":                self.extract_roles(),
+            "resource_assignments": self.extract_assignments(project_ids),
+        }</span>
+    </code></pre>
+    <div class="annotation" id="ann-re-res">
+      <div class="annotation-tag">Tenant-wide vs. per-project</div>
+      <p>Resources and roles are <em>master data</em> — they exist at the tenant level, not scoped to any project. One employee can work on dozens of projects. So we fetch them once for the whole tenant and cross-reference by <code>ResourceObjectId</code> in the assignments.</p>
+    </div>
+    <div class="annotation" id="ann-re-asgn">
+      <div class="annotation-tag">extract_assignments — same loop pattern</div>
+      <p>Identical loop structure to <code>ProjectExtractor.extract_wbs()</code>. This is intentional — a consistent pattern across extractors makes the code predictable. A developer who knows one extractor can immediately read any other.</p>
+    </div>
+  </div>
+
+  <!-- COMPLETE USAGE EXAMPLE -->
+  <h2>Putting it all together</h2>
+  <div class="code-block">
+    <div class="code-label">Complete API extraction flow (as used in the Airflow DAG)</div>
+    <pre><code class="language-python">from src.p6_client import OPCClient
+from src.utils.config import get_opc_config
+from src.extractors.project_extractor import ProjectExtractor
+from src.extractors.cost_extractor import CostExtractor
+from src.extractors.resource_extractor import ResourceExtractor
+
+config = get_opc_config()
+
+with OPCClient(config) as client:
+    # ── Step 1: Extract project hierarchy ──────────────────
+    proj_ext = ProjectExtractor(client, status_filter=["Active", "What-if"])
+    data = proj_ext.extract_all()
+    # data = {"projects": [...], "wbs": [...], "activities": [...]}
+
+    project_ids = [p["ObjectId"] for p in data["projects"]]
+    print(f"Projects: {len(data['projects'])}")
+    print(f"WBS nodes: {len(data['wbs'])}")
+    print(f"Activities: {len(data['activities'])}")
+
+    # ── Step 2: Extract cost fields only ───────────────────
+    cost_ext = CostExtractor(client)
+    project_cost = cost_ext.extract_project_cost(data["projects"])
+    activity_cost = cost_ext.extract_activity_cost(data["activities"])
+
+    # ── Step 3: Extract resource data ──────────────────────
+    res_ext = ResourceExtractor(client)
+    res_data = res_ext.extract_all(project_ids)
+    # res_data = {"resources": [...], "roles": [...], "resource_assignments": [...]}
+
+    print(f"Resources: {len(res_data['resources'])}")
+    print(f"Assignments: {len(res_data['resource_assignments'])}")
+
+# Session automatically closed here
+</code></pre>
+  </div>
+
+  <!-- QUIZ 5 -->
+  <div class="quiz">
+    <div class="quiz-head"><h3>🧠 Final Quiz</h3></div>
+    <div class="quiz-q"><p>In <code>CostExtractor.extract_project_cost()</code>, why does it use <code>p.get(k)</code> instead of <code>p[k]</code>?</p></div>
+    <div class="options" id="q4">
+      <div class="option" onclick="answer(this,'q4',false)"><div class="opt-radio"></div><code>.get()</code> is faster than bracket indexing for large dictionaries.</div>
+      <div class="option" onclick="answer(this,'q4',true)"><div class="opt-radio"></div><code>.get(k)</code> returns <code>None</code> if the key is missing, preventing a <code>KeyError</code> when OPC doesn't return a field for a particular project.</div>
+      <div class="option" onclick="answer(this,'q4',false)"><div class="opt-radio"></div>OPC field names can contain special characters that bracket syntax can't handle.</div>
+      <div class="option" onclick="answer(this,'q4',false)"><div class="opt-radio"></div>It allows the extractor to work with both dicts and objects.</div>
+    </div>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <!-- COMPLETION -->
+  <div id="completion-card" style="display:none;background:linear-gradient(135deg,rgba(82,204,154,.12),rgba(124,106,245,.1));border:1px solid var(--acc3);border-radius:var(--r);padding:28px;margin-top:28px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:10px;">🎉</div>
+    <h2 style="color:var(--acc3);margin:0 0 8px;font-size:20px;">All 5 Lessons Complete!</h2>
+    <p style="margin-bottom:18px;">You've walked through every line of the OPC API layer — from OAuth2 token acquisition to extractors.</p>
+    <a href="index.html" style="display:inline-block;padding:10px 24px;background:var(--acc);color:#fff;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px;">← Back to Learning Hub</a>
+  </div>
+
+  <div class="lesson-nav">
+    <button class="nav-btn prev" onclick="goLesson(3)">← Public API Methods</button>
+    <button class="nav-btn next" onclick="completeCourse()">Complete Course ✓</button>
+  </div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+hljs.highlightAll();
+
+let currentLesson = 0;
+const totalLessons = 5;
+const completed = new Set();
+
+// ── Lesson navigation ─────────────────────────
+function goLesson(n) {
+  document.querySelectorAll('.lesson').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.lesson-link').forEach(a => a.classList.remove('active'));
+
+  document.getElementById(`lesson-${n}`).classList.add('active');
+  document.querySelectorAll('.lesson-link')[n].classList.add('active');
+
+  // Update dot state
+  for (let i = 0; i < totalLessons; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.className = 'lesson-dot';
+    if (completed.has(i)) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+
+  // Mark previous lesson done when moving forward
+  if (n > currentLesson) {
+    completed.add(currentLesson);
+    document.getElementById(`dot-${currentLesson}`).className = 'lesson-dot done';
+    document.getElementById(`dot-${currentLesson}`).textContent = '✓';
+  }
+
+  currentLesson = n;
+  updateProgress();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function completeCourse() {
+  completed.add(4);
+  document.getElementById('dot-4').className = 'lesson-dot done';
+  document.getElementById('dot-4').textContent = '✓';
+  updateProgress();
+  document.getElementById('completion-card').style.display = 'block';
+  document.querySelector('#lesson-4 .lesson-nav').style.display = 'none';
+  window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+}
+
+function updateProgress() {
+  const pct = Math.round((completed.size / totalLessons) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${completed.size} / ${totalLessons} complete`;
+}
+
+// ── Annotations ───────────────────────────────
+function toggleAnn(id, line) {
+  const ann = document.getElementById(id);
+  const wasOpen = ann.classList.contains('show');
+  // Close all annotations
+  document.querySelectorAll('.annotation').forEach(a => a.classList.remove('show'));
+  document.querySelectorAll('.ann-line').forEach(l => l.classList.remove('highlighted'));
+  if (!wasOpen) {
+    ann.classList.add('show');
+    line.classList.add('highlighted');
+  }
+}
+
+// ── Fill in blanks ────────────────────────────
+function revealBlank(el) {
+  if (el.classList.contains('revealed')) return;
+  el.classList.add('revealed');
+}
+
+// ── Quiz ──────────────────────────────────────
+const correctFeedback = [
+  "✓ Correct! A 60-second buffer prevents the token from expiring during a slow API call — expiry_in=0 would be too late.",
+  "✓ Correct! HTTPError from raise_for_status() is NOT in the retry exception list, so it propagates immediately.",
+  "✓ Correct! The first page is full (500 records), so the generator tries again. The second call returns 0 records (empty), triggering the break.",
+  "✓ Correct! Server-side filtering is always more efficient — the API only returns relevant data instead of sending everything over the wire.",
+  "✓ Correct! dict.get(k) returns None for missing keys instead of raising KeyError — essential when OPC omits optional fields.",
+];
+const wrongFeedback = [
+  "✗ Not quite. The goal is to handle the time a single API call might take — not to reduce total token requests.",
+  "✗ Not quite. The retry decorator only catches Timeout and ConnectionError. HTTP status errors from raise_for_status() are not retried.",
+  "✗ Not quite. Think about what happens with exactly 500 records: the first page is \"full\", so the generator assumes there might be more and tries again.",
+  "✗ Not quite. The OPC API does support tenant-wide WBS, but filtering server-side is far more efficient than downloading all WBS and filtering in Python.",
+  "✗ Not quite. Performance isn't the reason — the key benefit is safety: .get() never raises an exception for missing keys.",
+];
+
+function answer(el, qid, isCorrect) {
+  const container = document.getElementById(qid);
+  if (container.querySelector('.locked')) return;  // already answered
+
+  container.querySelectorAll('.option').forEach(o => o.classList.add('locked'));
+  el.classList.add(isCorrect ? 'correct' : 'wrong');
+  el.querySelector('.opt-radio').style.background = isCorrect ? 'var(--correct-b)' : 'var(--wrong-b)';
+
+  // If wrong, highlight the correct one too
+  if (!isCorrect) {
+    const options = container.querySelectorAll('.option');
+    const qIndex = parseInt(qid.replace('q',''));
+    // Find correct option by iterating
+    options.forEach(o => {
+      if (o.onclick.toString().includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+
+  const fb = document.getElementById(`${qid}-fb`);
+  const qIndex = parseInt(qid.replace('q',''));
+  fb.textContent = isCorrect ? correctFeedback[qIndex] : wrongFeedback[qIndex];
+  fb.className = 'quiz-feedback show ' + (isCorrect ? 'ok' : 'bad');
+}
+
+// ── Simulator ─────────────────────────────────
+async function runSim() {
+  const mode = document.getElementById('sim-mode').value;
+  const out = document.getElementById('sim-out');
+  out.innerHTML = '';
+
+  const addLine = (text, cls='dim', delay=0) => new Promise(r => setTimeout(() => {
+    const d = document.createElement('div');
+    d.className = `sim-line ${cls}`;
+    d.textContent = text;
+    out.appendChild(d);
+    out.scrollTop = out.scrollHeight;
+    r();
+  }, delay));
+
+  const scenarios = {
+    success: async () => {
+      await addLine('> _get("projects", {fields:"ObjectId,Name", limit:500, offset:0})', 'info', 0);
+      await addLine('  _ensure_token() → token valid (expires_in: 847s)', 'dim', 200);
+      await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', 400);
+      await addLine('  ← 200 OK  [500 records]  (elapsed: 0.32s)', 'ok', 900);
+      await addLine('> Returned 500 records', 'ok', 1100);
+    },
+    timeout2: async () => {
+      await addLine('> _get("projects", ...)  [attempt 1/3]', 'info', 0);
+      await addLine('  _ensure_token() → token valid', 'dim', 200);
+      await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', 400);
+      await addLine('  ✗ requests.Timeout after 30s — retrying in 2s...', 'warn', 1200);
+      await addLine('> _get("projects", ...)  [attempt 2/3]', 'info', 1600);
+      await addLine('  _ensure_token() → token valid', 'dim', 1800);
+      await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', 2000);
+      await addLine('  ✗ requests.Timeout after 30s — retrying in 4s...', 'warn', 2800);
+      await addLine('> _get("projects", ...)  [attempt 3/3]', 'info', 3400);
+      await addLine('  _ensure_token() → token valid', 'dim', 3600);
+      await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', 3800);
+      await addLine('  ← 200 OK  [500 records]  (elapsed: 0.41s)', 'ok', 4600);
+      await addLine('> Returned 500 records after 2 retries', 'ok', 4900);
+    },
+    timeout3: async () => {
+      for (let i = 1; i <= 3; i++) {
+        const wait = i === 1 ? 0 : (i === 2 ? 1600 : 3400);
+        await addLine(`> _get("projects", ...)  [attempt ${i}/3]`, 'info', wait);
+        await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', wait + 200);
+        const waitStr = i < 3 ? ` — retrying in ${i*2}s...` : ' — no more retries';
+        await addLine(`  ✗ requests.Timeout after 30s${waitStr}`, 'warn', wait + 1000);
+      }
+      await addLine('> ✗ Raised: requests.Timeout (reraise=True)', 'err', 5000);
+      await addLine('  Airflow marks task as FAILED — will retry after 5 minutes', 'dim', 5200);
+    },
+    http401: async () => {
+      await addLine('> _get("projects", ...)  [attempt 1/3]', 'info', 0);
+      await addLine('  _ensure_token() → token valid', 'dim', 200);
+      await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', 400);
+      await addLine('  ← 401 Unauthorized', 'err', 900);
+      await addLine('  raise_for_status() → raises HTTPError', 'err', 1100);
+      await addLine('  HTTPError is NOT in retry_if_exception_type list', 'warn', 1300);
+      await addLine('> ✗ Raised immediately: HTTPError(401) — NO retry attempted', 'err', 1600);
+      await addLine('  Fix: check OPC_CLIENT_ID and OPC_CLIENT_SECRET in .env', 'dim', 1900);
+    },
+    http500: async () => {
+      await addLine('> _get("projects", ...)  [attempt 1/3]', 'info', 0);
+      await addLine('  GET https://tenant.oraclecloud.com/.../projects?...', 'dim', 300);
+      await addLine('  ← 500 Internal Server Error', 'err', 800);
+      await addLine('  raise_for_status() → raises HTTPError', 'err', 1000);
+      await addLine('  HTTPError is NOT in retry exception list', 'warn', 1200);
+      await addLine('> ✗ Raised immediately: HTTPError(500) — NO retry', 'err', 1500);
+      await addLine('  This is a server bug — retrying would not help', 'dim', 1800);
+    },
+  };
+
+  await scenarios[mode]();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+// ============================================================
+// Jenkins Pipeline: Oracle OPC P6 Pipeline
+// Stages: Checkout → Lint → Test → Build → Push → Deploy
+// ============================================================
+
+pipeline {
+    agent any
+
+    environment {
+        // Credentials configured in Jenkins → Manage Credentials
+        DOCKER_REGISTRY_CREDS = credentials('docker-registry-credentials')
+        DOCKER_REGISTRY        = "${env.DOCKER_REGISTRY ?: 'your-registry.example.com'}"
+        IMAGE_NAME             = "${env.DOCKER_IMAGE_NAME ?: 'oracle-opc-pipeline'}"
+        IMAGE_TAG              = "${env.DOCKER_IMAGE_TAG ?: env.BUILD_NUMBER}"
+        FULL_IMAGE             = "${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+        LATEST_IMAGE           = "${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+        // Pipeline env file stored as a Jenkins secret file
+        PIPELINE_ENV_FILE      = credentials('pipeline-env-file')
+    }
+
+    options {
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+
+        // ──────────────────────────────────────────────────────
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "Branch: ${env.GIT_BRANCH} | Commit: ${env.GIT_COMMIT}"
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        stage('Setup Python Env') {
+            steps {
+                sh '''
+                    python3 -m venv .venv
+                    . .venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        stage('Lint') {
+            steps {
+                sh '''
+                    . .venv/bin/activate
+                    flake8 src/ dags/ tests/ \
+                        --max-line-length=120 \
+                        --exclude=__pycache__ \
+                        --statistics
+                '''
+            }
+            post {
+                failure {
+                    echo 'Lint failed — fix flake8 errors before proceeding.'
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        stage('Unit Tests') {
+            steps {
+                sh '''
+                    . .venv/bin/activate
+                    pytest tests/ \
+                        --cov=src \
+                        --cov-report=xml:coverage.xml \
+                        --cov-report=term-missing \
+                        --junitxml=test-results.xml \
+                        -v
+                '''
+            }
+            post {
+                always {
+                    junit 'test-results.xml'
+                    publishCoverage adapters: [coberturaAdapter('coverage.xml')]
+                }
+                failure {
+                    echo 'Tests failed — pipeline stopped.'
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        stage('Build Docker Image') {
+            steps {
+                dir('.') {
+                    sh "docker build -f docker/Dockerfile -t ${FULL_IMAGE} -t ${LATEST_IMAGE} ."
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        stage('Push to Registry') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                    branch 'release/*'
+                }
+            }
+            steps {
+                sh '''
+                    echo "${DOCKER_REGISTRY_CREDS_PSW}" | \
+                        docker login ${DOCKER_REGISTRY} \
+                        -u "${DOCKER_REGISTRY_CREDS_USR}" --password-stdin
+                    docker push ${FULL_IMAGE}
+                    docker push ${LATEST_IMAGE}
+                '''
+            }
+            post {
+                always {
+                    sh 'docker logout ${DOCKER_REGISTRY} || true'
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        stage('Deploy') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                }
+            }
+            steps {
+                // Copy .env file from Jenkins credentials
+                sh 'cp ${PIPELINE_ENV_FILE} .env'
+                sh '''
+                    docker-compose -f docker/docker-compose.yml pull
+                    docker-compose -f docker/docker-compose.yml up -d \
+                        --remove-orphans \
+                        --force-recreate
+                '''
+                // Health check
+                sh '''
+                    sleep 30
+                    curl --fail --retry 5 --retry-delay 10 \
+                        http://localhost:8080/health || \
+                        (echo "Airflow health check failed" && exit 1)
+                '''
+            }
+        }
+
+    }
+
+    post {
+        always {
+            // Clean up dangling images
+            sh 'docker image prune -f || true'
+            // Clean venv
+            sh 'rm -rf .venv || true'
+            cleanWs()
+        }
+        success {
+            echo "Pipeline succeeded — image: ${FULL_IMAGE}"
+        }
+        failure {
+            echo "Pipeline failed at stage: ${env.STAGE_NAME}"
+            // Add notification here (e.g., Slack, email)
+        }
+    }
+}

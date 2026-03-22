@@ -1,0 +1,38 @@
+# ============================================================
+# Airflow Connections Reference
+# Import these via: airflow connections import airflow_connections.yaml
+# Or configure manually in Airflow UI → Admin → Connections
+# ============================================================
+
+opc_http_conn:
+  conn_type: http
+  description: "Oracle Primavera Cloud REST API"
+  host: "https://your-tenant.oraclecloud.com"
+  schema: "/ppmrestapi/v2"
+  # Store client_id and client_secret in Airflow Variables or as extras:
+  # extra: '{"client_id": "...", "client_secret": "...", "token_url": "..."}'
+
+oracle_p6_conn:
+  conn_type: oracle
+  description: "Oracle Database for P6 pipeline data"
+  host: "your-oracle-host"
+  port: 1521
+  schema: "P6_DATA"
+  login: "p6_pipeline_user"
+  # password: set via Airflow UI or secrets backend
+  # extra: '{"service_name": "your-service-name"}'
+
+minio_s3_conn:
+  conn_type: aws
+  description: "MinIO S3-compatible object storage"
+  # host: set endpoint_url in extra
+  # extra: '{"endpoint_url": "http://minio:9000", "aws_access_key_id": "minioadmin", "aws_secret_access_key": "minioadmin"}'
+
+# ============================================================
+# Airflow Variables (set via UI or: airflow variables set <key> <value>)
+# ============================================================
+# opc_client_id        = <your OPC OAuth2 client ID>
+# opc_client_secret    = <your OPC OAuth2 client secret>
+# opc_token_url        = https://idcs-<tenant>.identity.oraclecloud.com/oauth2/v1/token
+# opc_base_url         = https://<tenant>.oraclecloud.com/ppmrestapi/v2
+# pipeline_config_path = /opt/airflow/config/config.yaml

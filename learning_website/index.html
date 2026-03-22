@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle OPC API — Learning Hub</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232634;
+    --border: #2e3147;
+    --accent: #7c6af5;
+    --accent2: #5ec4f0;
+    --accent3: #56d09e;
+    --accent4: #f5a623;
+    --accent5: #f06292;
+    --text: #e2e4f0;
+    --text-muted: #8b8fa8;
+    --nav-w: 280px;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  nav {
+    width: var(--nav-w); min-width: var(--nav-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    height: 100vh; position: sticky; top: 0;
+    overflow-y: auto; padding: 24px 0;
+    display: flex; flex-direction: column;
+  }
+  .nav-logo { padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .nav-logo h2 { font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+  .nav-logo p { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .nav-section { padding: 6px 20px 2px; font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 8px; }
+  nav a { display: flex; align-items: center; gap: 8px; padding: 8px 20px; color: var(--text-muted); text-decoration: none; font-size: 13px; border-left: 3px solid transparent; transition: all 0.15s; }
+  nav a:hover, nav a.active { color: var(--text); background: rgba(124,106,245,0.1); border-left-color: var(--accent); }
+  nav a .icon { width: 16px; text-align: center; font-size: 13px; flex-shrink: 0; }
+
+  /* Main content */
+  main { flex: 1; padding: 40px 56px; max-width: 1100px; }
+
+  /* Sections */
+  section { margin-bottom: 72px; }
+  section:target { scroll-margin-top: 24px; }
+
+  h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  h1 span { color: var(--accent); }
+  h2 { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+  h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; color: var(--accent2); }
+  h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  p { color: var(--text-muted); margin-bottom: 14px; font-size: 14px; }
+  strong { color: var(--text); }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, rgba(124,106,245,0.15), rgba(94,196,240,0.08)); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 40px; }
+  .hero h1 { margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: var(--text-muted); max-width: 640px; margin: 0; }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.3px; }
+  .badge-purple { background: rgba(124,106,245,0.2); color: #a89ef8; border: 1px solid rgba(124,106,245,0.3); }
+  .badge-blue { background: rgba(94,196,240,0.15); color: #5ec4f0; border: 1px solid rgba(94,196,240,0.3); }
+  .badge-green { background: rgba(86,208,158,0.15); color: #56d09e; border: 1px solid rgba(86,208,158,0.3); }
+  .badge-orange { background: rgba(245,166,35,0.15); color: #f5a623; border: 1px solid rgba(245,166,35,0.3); }
+  .badge-pink { background: rgba(240,98,146,0.15); color: #f06292; border: 1px solid rgba(240,98,146,0.3); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .card-mini { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .card-mini h3 { font-size: 13px; margin-bottom: 6px; }
+  .card-mini p { font-size: 12px; margin: 0; }
+
+  /* Code blocks */
+  pre { border-radius: var(--radius); overflow-x: auto; margin: 16px 0; font-size: 13px; border: 1px solid var(--border); }
+  pre code { padding: 20px !important; display: block; }
+  .code-label { font-size: 11px; color: var(--text-muted); margin-bottom: -8px; padding: 8px 16px 0; background: var(--surface2); border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; font-weight: 600; letter-spacing: 0.5px; }
+
+  /* Diagram */
+  .diagram { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; font-family: 'Courier New', monospace; font-size: 13px; color: var(--accent2); line-height: 2; overflow-x: auto; margin: 16px 0; }
+
+  /* Flow */
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 20px 0; }
+  .flow-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .flow-box.purple { border-color: var(--accent); color: var(--accent); }
+  .flow-box.blue { border-color: var(--accent2); color: var(--accent2); }
+  .flow-box.green { border-color: var(--accent3); color: var(--accent3); }
+  .flow-box.orange { border-color: var(--accent4); color: var(--accent4); }
+  .flow-box.pink { border-color: var(--accent5); color: var(--accent5); }
+  .flow-arrow { color: var(--text-muted); padding: 0 8px; font-size: 18px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); color: var(--text); padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; border-bottom: 2px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); font-family: monospace; font-size: 12px; }
+  td code { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--accent2); }
+
+  /* Callouts */
+  .callout { border-radius: var(--radius); padding: 14px 18px; margin: 16px 0; font-size: 13px; border-left: 4px solid; }
+  .callout-info { background: rgba(94,196,240,0.08); border-color: var(--accent2); }
+  .callout-warn { background: rgba(245,166,35,0.08); border-color: var(--accent4); }
+  .callout-success { background: rgba(86,208,158,0.08); border-color: var(--accent3); }
+  .callout-note { background: rgba(124,106,245,0.08); border-color: var(--accent); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .callout p { margin: 0; }
+
+  /* Steps */
+  .steps { counter-reset: steps; }
+  .step { display: flex; gap: 16px; margin-bottom: 20px; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step-body h3 { margin-bottom: 4px; font-size: 14px; color: var(--text); }
+  .step-body p { margin: 0; font-size: 13px; }
+
+  /* Formula cards */
+  .formula-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .formula-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .formula-card .abbr { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+  .formula-card .name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .formula-card .eq { font-family: monospace; font-size: 13px; color: var(--accent2); background: var(--surface); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+  .formula-card .desc { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+  /* Tabs */
+  .tabs { margin: 20px 0; }
+  .tab-bar { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tab-btn { padding: 8px 16px; background: none; border: none; color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Dividers */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { display: none; }
+    main { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="nav">
+  <div class="nav-logo">
+    <h2>Oracle OPC API</h2>
+    <p>Learning Hub</p>
+  </div>
+  <div class="nav-section">Interactive</div>
+  <a href="api_learning.html"><span class="icon">🎓</span> API Code Learning</a>
+  <div class="nav-section">Start Here</div>
+  <a href="#overview" class="active"><span class="icon">🏠</span> Overview</a>
+  <a href="#architecture"><span class="icon">🗺</span> Architecture</a>
+  <a href="#data-flow"><span class="icon">🔄</span> Data Flow</a>
+  <div class="nav-section">Core Concepts</div>
+  <a href="#oauth2"><span class="icon">🔐</span> OAuth2 Authentication</a>
+  <a href="#pagination"><span class="icon">📄</span> Pagination</a>
+  <a href="#evm"><span class="icon">📊</span> Earned Value (EVM)</a>
+  <a href="#upsert"><span class="icon">🔀</span> Oracle MERGE Upsert</a>
+  <div class="nav-section">Source Code</div>
+  <a href="#client"><span class="icon">🌐</span> p6_client.py</a>
+  <a href="#extractors"><span class="icon">🪝</span> Extractors</a>
+  <a href="#transformers"><span class="icon">⚙️</span> Transformers</a>
+  <a href="#loaders"><span class="icon">💾</span> Loaders</a>
+  <a href="#utils"><span class="icon">🛠</span> Utils</a>
+  <div class="nav-section">Pipeline</div>
+  <a href="#airflow"><span class="icon">✈️</span> Airflow DAGs</a>
+  <a href="#sql"><span class="icon">🗄</span> SQL Schema</a>
+  <a href="#docker"><span class="icon">🐳</span> Docker Setup</a>
+  <a href="#jenkins"><span class="icon">🏗</span> Jenkins CI/CD</a>
+  <div class="nav-section">Reference</div>
+  <a href="#config"><span class="icon">⚙️</span> Configuration</a>
+  <a href="#testing"><span class="icon">🧪</span> Testing</a>
+  <a href="#quickstart"><span class="icon">🚀</span> Quickstart</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- ─── OVERVIEW ─── -->
+  <section id="overview">
+    <div class="hero">
+      <h1>Oracle OPC API <span>Learning Hub</span></h1>
+      <p>A full data pipeline: Oracle Primavera Cloud REST API v2 → Oracle DB + MinIO, orchestrated by Apache Airflow. Learn the architecture, each module, and the key concepts from ground up.</p>
+      <div class="badge-row">
+        <span class="badge badge-purple">Python 3.11</span>
+        <span class="badge badge-blue">Airflow 2.8.4</span>
+        <span class="badge badge-green">Oracle DB (python-oracledb)</span>
+        <span class="badge badge-orange">MinIO S3</span>
+        <span class="badge badge-pink">Docker + Jenkins</span>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:rgba(124,106,245,0.12);border:1px solid rgba(124,106,245,0.35);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#a89ef8;margin-bottom:3px;">NEW — Interactive API Learning</div>
+        <div style="font-size:13px;color:var(--text-muted);">5 lessons with click-to-reveal annotations, fill-in-the-blank exercises, quizzes, and a retry simulator.</div>
+      </div>
+      <a href="api_learning.html" style="display:inline-block;padding:9px 20px;background:var(--accent);color:#fff;border-radius:7px;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;">Start Learning →</a>
+    </div>
+
+    <h2>What does this project do?</h2>
+    <div class="card-grid">
+      <div class="card-mini">
+        <h3>🔗 Extract</h3>
+        <p>Connects to Oracle Primavera Cloud (OPC) REST API v2 using OAuth2. Fetches projects, WBS, activities, resources, and assignments with automatic pagination.</p>
+      </div>
+      <div class="card-mini">
+        <h3>⚙️ Transform</h3>
+        <p>Calculates Earned Value Management (EVM) metrics (CPI, SPI, EAC, VAC, TCPI) and resource utilization percentages from raw OPC data.</p>
+      </div>
+      <div class="card-mini">
+        <h3>💾 Load</h3>
+        <p>Stores raw JSON in MinIO (data lake), processed Parquet files in MinIO, and upserts structured records into Oracle DB using PL/SQL MERGE procedures.</p>
+      </div>
+      <div class="card-mini">
+        <h3>✈️ Orchestrate</h3>
+        <p>Three Apache Airflow DAGs schedule and monitor the pipeline. Runs daily at 02:00 UTC with automatic retry on failure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ARCHITECTURE ─── -->
+  <section id="architecture">
+    <h2>Architecture</h2>
+    <p>The system follows an <strong>ETL pipeline</strong> pattern with a medallion lake architecture (raw → processed zones).</p>
+
+    <div class="diagram">
+┌─────────────────────────────────────────────────────────────────┐
+│                     ORACLE PRIMAVERA CLOUD                      │
+│              REST API v2  (OAuth2, HTTPS, JSON)                 │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ HTTP GET with Bearer Token
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    src/p6_client.py                             │
+│   OPCClient: auth, pagination, tenacity retry (3x backoff)     │
+└──────┬──────────────┬──────────────┬───────────────────────────┘
+       │              │              │
+       ▼              ▼              ▼
+  ProjectExtractor  CostExtractor  ResourceExtractor
+  (project,wbs,     (ev fields)    (resources,roles,
+   activities)                      assignments)
+       │              │              │
+       └──────────────┴──────────────┘
+                      │
+                      ▼
+          ┌───────────────────────┐
+          │  MinIO  (p6-raw)      │  ← Raw JSON archive
+          │  YYYY/MM/DD/entity.json│
+          └───────────┬───────────┘
+                      │
+         ┌────────────┴────────────┐
+         ▼                         ▼
+  CostCalculator           ResourceCalculator
+  (CPI, SPI, EAC,          (utilization %,
+   VAC, TCPI, CV, SV)       summary per resource)
+         │                         │
+         └────────────┬────────────┘
+                      │
+          ┌───────────▼───────────┐
+          │  MinIO (p6-processed) │  ← Parquet (compressed)
+          │  YYYY/MM/DD/entity.parquet│
+          └───────────┬───────────┘
+                      │
+          ┌───────────▼───────────┐
+          │  OracleLoader         │  ← PKG_P6_PIPELINE MERGE
+          │  7 Oracle tables      │
+          │  P6_DATA schema       │
+          └───────────────────────┘</div>
+
+    <h3>Component Responsibilities</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Layer</th><th>File</th><th>Responsibility</th></tr>
+        <tr><td>API Client</td><td>src/p6_client.py</td><td>OAuth2 auth, HTTP GET, pagination generator, retry logic</td></tr>
+        <tr><td>Extract</td><td>src/extractors/*.py</td><td>Orchestrate API calls, return raw dicts, push to MinIO raw</td></tr>
+        <tr><td>Transform</td><td>src/transformers/*.py</td><td>Pure-Python EVM math + resource utilization calculations</td></tr>
+        <tr><td>Load (lake)</td><td>src/loaders/minio_loader.py</td><td>Raw JSON archive + processed Parquet storage with date partitioning</td></tr>
+        <tr><td>Load (DB)</td><td>src/loaders/oracle_loader.py</td><td>Connection pool, executemany batches, MERGE via PL/SQL</td></tr>
+        <tr><td>Orchestrate</td><td>dags/*.py</td><td>Schedule, dependencies, XCom, retry, monitoring</td></tr>
+        <tr><td>DDL</td><td>sql/create_tables.sql</td><td>Oracle table definitions, PKs, FKs, indexes</td></tr>
+        <tr><td>DML</td><td>sql/upsert_procedures.sql</td><td>MERGE procedures package PKG_P6_PIPELINE</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── DATA FLOW ─── -->
+  <section id="data-flow">
+    <h2>Data Flow</h2>
+    <p>Follow the journey of a single project record through the entire pipeline.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>OPC API call (01:00 UTC)</h3>
+          <p>Airflow triggers <code>p6_extract_dag</code>. <code>OPCClient</code> fetches an OAuth2 token, then paginates <code>GET /projects?fields=...&limit=500&offset=0</code>. Returns a list of raw dicts.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>MinIO raw upload</h3>
+          <p>Raw project list is serialized to JSON and uploaded to <code>p6-raw/2026/01/15/projects.json</code>. Immutable audit trail — never overwritten.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>EVM calculation (02:00 UTC)</h3>
+          <p><code>p6_full_pipeline_dag</code> downloads the raw JSON, passes it to <code>calculate_project_ev_metrics()</code>. Computes CPI=EV/AC, SPI=EV/PV, EAC=BAC/CPI, etc. Returns enriched dicts.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>MinIO processed upload</h3>
+          <p>Enriched records are converted to a pandas DataFrame, saved as Parquet (compressed, columnar) at <code>p6-processed/2026/01/15/cost_metrics.parquet</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Oracle MERGE upsert</h3>
+          <p><code>OracleLoader</code> calls <code>PKG_P6_PIPELINE.UPSERT_COST_METRIC(:1,...)</code> via <code>executemany()</code> in batches of 500. PL/SQL MERGE atomically inserts new rows or updates existing ones (idempotent).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow" style="margin-top:24px">
+      <div class="flow-box purple">OPC API</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">OPCClient</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Extractors</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box orange">MinIO raw</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">Transformers</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box orange">MinIO processed</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box pink">Oracle DB</div>
+    </div>
+  </section>
+
+  <!-- ─── OAUTH2 ─── -->
+  <section id="oauth2">
+    <h2>OAuth2 Authentication</h2>
+    <p>OPC uses the <strong>client_credentials grant</strong> — server-to-server auth with no user login required.</p>
+
+    <div class="callout callout-info">
+      <strong>How it works</strong>
+      <p>Your app sends its Client ID + Secret to Oracle's IDCS (Identity Cloud Service). IDCS returns a short-lived Bearer token. All subsequent API calls include <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+    </div>
+
+    <div class="flow" style="margin-bottom:20px">
+      <div class="flow-box purple">App (client_id + secret)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">POST /oauth2/token</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">access_token (15 min TTL)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box orange">GET /projects (Bearer token)</div>
+    </div>
+
+    <div class="code-label">src/p6_client.py — OAuth2 implementation</div>
+    <pre><code class="language-python">from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import BackendApplicationClient
+import time
+
+class OPCClient:
+    def __init__(self, config: dict):
+        self.config = config
+        self._session = None
+        self._token_expiry = 0
+
+    def _create_session(self):
+        """Create OAuth2 session using client_credentials grant."""
+        client = BackendApplicationClient(client_id=self.config["client_id"])
+        return OAuth2Session(client=client)
+
+    def _fetch_token(self, session: OAuth2Session) -> dict:
+        """POST to IDCS token URL to get an access token."""
+        token = session.fetch_token(
+            token_url=self.config["token_url"],
+            client_id=self.config["client_id"],
+            client_secret=self.config["client_secret"],
+            scope=self.config.get("scope", "")
+        )
+        # Store expiry time for refresh logic
+        self._token_expiry = token["expires_at"]
+        return token
+
+    def _ensure_token(self):
+        """Refresh token if it expires within 60 seconds."""
+        if time.time() > self._token_expiry - 60:
+            self._fetch_token(self._session)
+
+    # Context manager — auto-closes HTTP session
+    def __enter__(self):
+        self._session = self._create_session()
+        self._fetch_token(self._session)
+        return self
+
+    def __exit__(self, *args):
+        if self._session:
+            self._session.close()
+
+# Usage:
+with OPCClient(config) as client:
+    projects = client.get_projects()   # Token managed automatically
+</code></pre>
+
+    <div class="callout callout-warn">
+      <strong>Token Refresh</strong>
+      <p>Oracle tokens expire after ~15 minutes. <code>_ensure_token()</code> is called before every API request. If the token expires within 60 seconds, it proactively refreshes — preventing 401 errors mid-pipeline.</p>
+    </div>
+  </section>
+
+  <!-- ─── PAGINATION ─── -->
+  <section id="pagination">
+    <h2>Pagination</h2>
+    <p>The OPC API returns results in pages (max 500 records per request). The client uses a <strong>generator</strong> to lazily fetch pages on demand.</p>
+
+    <div class="code-label">src/p6_client.py — Pagination generator</div>
+    <pre><code class="language-python">def _paginate(self, endpoint: str, fields: list, extra_filter: str = None):
+    """Generator: yields one page of records at a time."""
+    page_size = self.config["page_size"]  # Default: 500
+    offset = 0
+
+    while True:
+        params = {
+            "fields": ",".join(fields),   # e.g. "ObjectId,Name,Status"
+            "limit": page_size,
+            "offset": offset
+        }
+        if extra_filter:
+            params["filter"] = extra_filter  # e.g. "Status='Active'"
+
+        records = self._get(endpoint, params)  # HTTP GET with retry
+
+        if not records:
+            break  # Empty response = done
+
+        yield records  # Caller processes this page
+
+        if len(records) < page_size:
+            break  # Partial page = last page
+
+        offset += page_size  # Move to next page
+
+def _get_all(self, endpoint: str, fields: list, extra_filter: str = None) -> list:
+    """Collect all pages into a single list."""
+    result = []
+    for page in self._paginate(endpoint, fields, extra_filter):
+        result.extend(page)
+    return result
+
+# Example: Fetch all projects in status "Active" or "What-if"
+# OPC filter syntax: field IN ('val1', 'val2')
+projects = client._get_all(
+    endpoint="/projects",
+    fields=["ObjectId", "Name", "Status", "StartDate", "FinishDate"],
+    extra_filter="Status IN ('Active', 'What-if')"
+)
+# If there are 1,200 projects: makes 3 API calls (500 + 500 + 200)
+</code></pre>
+
+    <div class="callout callout-success">
+      <strong>Why a generator?</strong>
+      <p>A generator uses <strong>lazy evaluation</strong> — it doesn't load all pages into memory at once. If you only need the first 50 records, you can <code>break</code> early and avoid unnecessary API calls.</p>
+    </div>
+
+    <h3>Retry Logic (Tenacity)</h3>
+    <div class="code-label">src/p6_client.py — Retry decorator</div>
+    <pre><code class="language-python">from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from requests.exceptions import Timeout, ConnectionError
+
+@retry(
+    retry=retry_if_exception_type((Timeout, ConnectionError)),  # Only retry network errors
+    stop=stop_after_attempt(3),              # Give up after 3 attempts
+    wait=wait_exponential(multiplier=1, min=2, max=30),  # Wait 2s, 4s, 8s... (max 30s)
+    reraise=True
+)
+def _get(self, endpoint: str, params: dict) -> list:
+    """HTTP GET with automatic retry on network errors."""
+    self._ensure_token()   # Refresh token if needed
+    url = f"{self.config['base_url']}{endpoint}"
+    response = self._session.get(
+        url, params=params,
+        timeout=self.config.get("timeout", 30)
+    )
+    response.raise_for_status()  # Raises HTTPError for 4xx/5xx (NOT retried)
+    return response.json()
+
+# Retry timeline (if server times out):
+# Attempt 1: immediate
+# Wait 2 seconds...
+# Attempt 2: retry
+# Wait 4 seconds...
+# Attempt 3: retry (final)
+# Raises ConnectionError if still failing
+</code></pre>
+  </section>
+
+  <!-- ─── EVM ─── -->
+  <section id="evm">
+    <h2>Earned Value Management (EVM)</h2>
+    <p>EVM is a project performance measurement technique that integrates scope, schedule, and cost. It answers: <em>"Are we on budget? Are we on schedule? How much will this project cost when finished?"</em></p>
+
+    <h3>The Three Pillars</h3>
+    <div class="formula-grid">
+      <div class="formula-card">
+        <div class="abbr">PV</div>
+        <div class="name">Planned Value</div>
+        <div class="eq">PlannedValueCost</div>
+        <div class="desc">Budget authorized for work scheduled to be done by now.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">EV</div>
+        <div class="name">Earned Value</div>
+        <div class="eq">EarnedValueCost</div>
+        <div class="desc">Budget authorized for work actually completed.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">AC</div>
+        <div class="name">Actual Cost</div>
+        <div class="eq">ActualTotalCost</div>
+        <div class="desc">Actual money spent on work completed so far.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">BAC</div>
+        <div class="name">Budget at Completion</div>
+        <div class="eq">TotalBudgetedCost</div>
+        <div class="desc">Total budget for the entire project.</div>
+      </div>
+    </div>
+
+    <h3>Performance Indices</h3>
+    <div class="formula-grid">
+      <div class="formula-card">
+        <div class="abbr">CPI</div>
+        <div class="name">Cost Performance Index</div>
+        <div class="eq">EV / AC</div>
+        <div class="desc">1.0 = on budget. &lt;1.0 = over budget. 0.8 = spending 25% more than planned.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">SPI</div>
+        <div class="name">Schedule Performance Index</div>
+        <div class="eq">EV / PV</div>
+        <div class="desc">1.0 = on schedule. &lt;1.0 = behind. 0.8 = only 80% of planned work done.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">CV</div>
+        <div class="name">Cost Variance</div>
+        <div class="eq">EV - AC</div>
+        <div class="desc">Negative = over budget. Positive = under budget.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">SV</div>
+        <div class="name">Schedule Variance</div>
+        <div class="eq">EV - PV</div>
+        <div class="desc">Negative = behind schedule. Positive = ahead of schedule.</div>
+      </div>
+    </div>
+
+    <h3>Forecasting</h3>
+    <div class="formula-grid">
+      <div class="formula-card">
+        <div class="abbr">EAC</div>
+        <div class="name">Estimate at Completion</div>
+        <div class="eq">BAC / CPI</div>
+        <div class="desc">If current cost efficiency continues: expected final project cost.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">VAC</div>
+        <div class="name">Variance at Completion</div>
+        <div class="eq">BAC - EAC</div>
+        <div class="desc">Expected over/under run at completion. Negative = over budget.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">TCPI</div>
+        <div class="name">To-Complete Performance Index</div>
+        <div class="eq">(BAC-EV) / (BAC-AC)</div>
+        <div class="desc">Cost efficiency needed for remaining work. &gt;1.2 = unrealistic target.</div>
+      </div>
+      <div class="formula-card">
+        <div class="abbr">CV%</div>
+        <div class="name">Cost Variance %</div>
+        <div class="eq">CV / BAC × 100</div>
+        <div class="desc">Percentage over/under budget relative to total budget.</div>
+      </div>
+    </div>
+
+    <div class="code-label">src/transformers/cost_calculator.py — EVM calculations</div>
+    <pre><code class="language-python">def _safe_div(numerator, denominator, default=0.0):
+    """Avoid ZeroDivisionError for incomplete projects."""
+    if denominator == 0 or denominator is None:
+        return default
+    return numerator / denominator
+
+def calculate_project_ev_metrics(projects: list, eac_method="BAC_CPI", run_date=None) -> list:
+    """
+    Input:  list of raw OPC project dicts
+    Output: list of EVM metric dicts (ready for Oracle upsert)
+    """
+    results = []
+    today = run_date or date.today().isoformat()
+
+    for p in projects:
+        # 1. Extract base values
+        pv  = p.get("PlannedValueCost", 0) or 0
+        ev  = p.get("EarnedValueCost", 0)  or 0
+        ac  = p.get("ActualTotalCost", 0)  or 0
+        bac = p.get("BudgetAtCompletion") or p.get("TotalBudgetedCost", 0) or 0
+
+        # 2. Performance indices
+        cpi = _safe_div(ev, ac)    # Cost efficiency
+        spi = _safe_div(ev, pv)    # Schedule efficiency
+        cv  = ev - ac               # Cost variance
+        sv  = ev - pv               # Schedule variance
+
+        # 3. Forecast
+        if eac_method == "BAC_CPI":
+            eac = _safe_div(bac, cpi)           # Assumes current burn rate continues
+        else:  # AC_PLUS_REMAINING
+            eac = ac + (bac - ev)               # Assumes remaining work on budget
+
+        vac  = bac - eac                        # Variance at completion
+        tcpi = _safe_div(bac - ev, bac - ac)    # Required future efficiency
+        cv_pct = _safe_div(cv, bac) * 100
+        sv_pct = _safe_div(sv, bac) * 100
+
+        results.append({
+            "PROJECT_OBJECT_ID": p["ObjectId"],
+            "RUN_DATE":          today,
+            "PV": pv, "EV": ev, "AC": ac, "BAC": bac,
+            "CPI": round(cpi, 6), "SPI": round(spi, 6),
+            "CV": round(cv, 2),   "SV": round(sv, 2),
+            "EAC": round(eac, 2), "VAC": round(vac, 2),
+            "TCPI": round(tcpi, 6),
+            "CV_PCT": round(cv_pct, 4), "SV_PCT": round(sv_pct, 4),
+            "EAC_METHOD": eac_method
+        })
+
+    return results
+
+# ── EXAMPLE ─────────────────────────────────────────────────────────────
+project = {
+    "ObjectId": 1001,
+    "PlannedValueCost": 500_000,   # Should have spent $500K by now
+    "EarnedValueCost":  400_000,   # Only completed $400K of work
+    "ActualTotalCost":  450_000,   # Actually spent $450K
+    "TotalBudgetedCost": 1_000_000
+}
+metrics = calculate_project_ev_metrics([project])
+# CPI = 400K/450K = 0.889  → 11% over budget
+# SPI = 400K/500K = 0.800  → 20% behind schedule
+# EAC = 1M/0.889 = $1.125M → expect to overspend by $125K
+</code></pre>
+  </section>
+
+  <!-- ─── ORACLE MERGE ─── -->
+  <section id="upsert">
+    <h2>Oracle MERGE (Upsert)</h2>
+    <p>A MERGE statement atomically inserts a new row if it doesn't exist, or updates it if it does. This makes the pipeline <strong>idempotent</strong> — safe to run multiple times without duplicate data.</p>
+
+    <div class="callout callout-note">
+      <strong>Why MERGE over INSERT/UPDATE?</strong>
+      <p>A separate INSERT + UPDATE requires two round-trips and a race condition check. MERGE does it in one atomic SQL statement — the database handles the "does it exist?" check internally.</p>
+    </div>
+
+    <div class="code-label">sql/upsert_procedures.sql — MERGE pattern</div>
+    <pre><code class="language-sql">CREATE OR REPLACE PACKAGE BODY PKG_P6_PIPELINE AS
+
+  PROCEDURE UPSERT_PROJECT(
+    p_object_id          IN NUMBER,
+    p_project_id         IN VARCHAR2,
+    p_project_name       IN VARCHAR2,
+    p_status             IN VARCHAR2,
+    p_start_date         IN DATE,
+    p_finish_date        IN DATE,
+    p_total_budgeted     IN NUMBER,
+    p_actual_total_cost  IN NUMBER,
+    p_cpi                IN NUMBER,
+    p_spi                IN NUMBER,
+    p_eac                IN NUMBER,
+    p_bac                IN NUMBER
+  ) IS
+  BEGIN
+    MERGE INTO P6_DATA.P6_PROJECTS tgt
+    USING (SELECT p_object_id AS OBJECT_ID FROM DUAL) src  -- DUAL = Oracle's 1-row virtual table
+    ON (tgt.OBJECT_ID = src.OBJECT_ID)                     -- Match key
+
+    WHEN MATCHED THEN UPDATE SET              -- Row exists → UPDATE
+      PROJECT_ID       = p_project_id,
+      PROJECT_NAME     = p_project_name,
+      CPI              = p_cpi,
+      LOAD_TIMESTAMP   = SYSTIMESTAMP         -- Always update audit timestamp
+
+    WHEN NOT MATCHED THEN INSERT (            -- Row missing → INSERT
+      OBJECT_ID, PROJECT_ID, PROJECT_NAME,
+      STATUS, START_DATE, FINISH_DATE,
+      TOTAL_BUDGETED_COST, ACTUAL_TOTAL_COST,
+      CPI, SPI, EAC, BAC,
+      LOAD_TIMESTAMP
+    ) VALUES (
+      p_object_id, p_project_id, p_project_name,
+      p_status, p_start_date, p_finish_date,
+      p_total_budgeted, p_actual_total_cost,
+      p_cpi, p_spi, p_eac, p_bac,
+      SYSTIMESTAMP
+    );
+  END UPSERT_PROJECT;
+
+END PKG_P6_PIPELINE;
+</code></pre>
+
+    <h3>Calling from Python</h3>
+    <div class="code-label">src/loaders/oracle_loader.py — Bulk execute</div>
+    <pre><code class="language-python">import oracledb
+
+class OracleLoader:
+    def _bulk_execute(self, conn, procedure: str, records: list, batch_size=500) -> int:
+        """
+        Call a PL/SQL procedure for many records using executemany().
+        10-100x faster than calling execute() in a loop!
+        """
+        cursor = conn.cursor()
+        count = 0
+
+        # Convert list of dicts → list of ordered value lists
+        for i in range(0, len(records), batch_size):
+            batch = records[i : i + batch_size]
+            data = [list(r.values()) for r in batch]  # Extract values in column order
+
+            cursor.executemany(procedure, data)  # Single call for entire batch!
+            count += len(batch)
+
+        return count
+
+    def upsert_projects(self, records: list) -> int:
+        # PL/SQL call with 12 bind variables (:1, :2, ... :12)
+        procedure = "BEGIN PKG_P6_PIPELINE.UPSERT_PROJECT(:1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11,:12); END;"
+
+        with self._get_connection() as conn:  # Auto commit/rollback
+            return self._bulk_execute(conn, procedure, records)
+
+# ── Connection pool + transaction context manager ─────────────────────
+from contextlib import contextmanager
+
+@contextmanager
+def _get_connection(self):
+    if not self._pool:
+        self.connect()  # Lazy initialization
+
+    conn = self._pool.acquire()  # Get connection from pool
+    try:
+        yield conn        # Execute within this block
+        conn.commit()     # Success → commit
+    except Exception:
+        conn.rollback()   # Failure → rollback (atomicity!)
+        raise
+    finally:
+        self._pool.release(conn)  # Always return to pool
+</code></pre>
+  </section>
+
+  <!-- ─── CLIENT ─── -->
+  <section id="client">
+    <h2>p6_client.py — OPCClient</h2>
+    <p>The single entry point for all OPC API calls. Handles auth, retry, pagination, and connection lifecycle.</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+        <tr><td>get_projects(status_filter)</td><td>list[dict]</td><td>All active projects. Filter: <code>["Active", "What-if"]</code></td></tr>
+        <tr><td>get_wbs(project_object_id)</td><td>list[dict]</td><td>WBS nodes for one project</td></tr>
+        <tr><td>get_activities(project_object_id)</td><td>list[dict]</td><td>Activities for one project</td></tr>
+        <tr><td>get_resources()</td><td>list[dict]</td><td>Tenant-wide resource master</td></tr>
+        <tr><td>get_roles()</td><td>list[dict]</td><td>Tenant-wide role templates</td></tr>
+        <tr><td>get_resource_assignments(project_id)</td><td>list[dict]</td><td>Assignments for one project</td></tr>
+      </table>
+    </div>
+
+    <div class="code-label">Full usage example</div>
+    <pre><code class="language-python">from src.p6_client import OPCClient
+from src.utils.config import get_opc_config
+
+config = get_opc_config()  # Loads from config.yaml + .env
+
+with OPCClient(config) as client:
+
+    # Get all active projects
+    projects = client.get_projects(status_filter=["Active", "What-if"])
+    print(f"Found {len(projects)} projects")
+
+    # Get WBS for each project
+    all_wbs = []
+    for project in projects:
+        pid = project["ObjectId"]
+        wbs = client.get_wbs(pid)
+        all_wbs.extend(wbs)
+        print(f"  Project {pid}: {len(wbs)} WBS nodes")
+
+    # Get resources (tenant-wide, no per-project needed)
+    resources = client.get_resources()
+    print(f"Tenant resources: {len(resources)}")
+
+# Output:
+# Found 47 projects
+#   Project 1001: 23 WBS nodes
+#   Project 1002: 15 WBS nodes
+#   ...
+# Tenant resources: 312
+</code></pre>
+  </section>
+
+  <!-- ─── EXTRACTORS ─── -->
+  <section id="extractors">
+    <h2>Extractors</h2>
+    <p>Thin orchestration wrappers around <code>OPCClient</code>. They coordinate multi-entity fetches and return clean lists of dicts.</p>
+
+    <div class="tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-proj')">ProjectExtractor</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-cost')">CostExtractor</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-res')">ResourceExtractor</button>
+      </div>
+
+      <div id="tab-proj" class="tab-panel active">
+        <pre><code class="language-python">class ProjectExtractor:
+    def __init__(self, client: OPCClient):
+        self.client = client
+
+    def extract_projects(self, status_filter=None) -> list[dict]:
+        projects = self.client.get_projects(status_filter)
+        logger.info("Extracted projects", extra={"count": len(projects)})
+        return projects
+
+    def extract_wbs(self, project_ids: list[int]) -> list[dict]:
+        wbs_all = []
+        for pid in project_ids:
+            wbs = self.client.get_wbs(pid)
+            wbs_all.extend(wbs)
+        return wbs_all
+
+    def extract_activities(self, project_ids: list[int]) -> list[dict]:
+        acts = []
+        for pid in project_ids:
+            acts.extend(self.client.get_activities(pid))
+        return acts
+
+    def extract_all(self) -> dict:
+        """Convenience: fetch everything in one call."""
+        projects = self.extract_projects(status_filter=["Active", "What-if"])
+        project_ids = [p["ObjectId"] for p in projects]
+        return {
+            "projects":   projects,
+            "wbs":        self.extract_wbs(project_ids),
+            "activities": self.extract_activities(project_ids)
+        }
+</code></pre>
+      </div>
+
+      <div id="tab-cost" class="tab-panel">
+        <pre><code class="language-python">class CostExtractor:
+    """Filters raw OPC records to only EV/cost fields — avoids sending
+    unnecessary columns through the pipeline."""
+
+    # OPC field names for cost/EV data
+    _PROJECT_COST_FIELDS = [
+        "ObjectId", "PlannedValueCost", "EarnedValueCost",
+        "ActualTotalCost", "BudgetAtCompletion", "TotalBudgetedCost",
+        "VarianceAtCompletion", "TotalActualCost"
+    ]
+
+    def extract_project_cost(self, projects: list[dict]) -> list[dict]:
+        """Return only cost-relevant columns from project records."""
+        return [
+            {k: p.get(k) for k in self._PROJECT_COST_FIELDS}
+            for p in projects
+        ]
+        # dict.get(k) returns None for missing keys (no KeyError)
+
+    def extract_activity_cost(self, activities: list[dict]) -> list[dict]:
+        _ACTIVITY_COST_FIELDS = [
+            "ObjectId", "Name", "WBSObjectId", "ProjectObjectId",
+            "PlannedTotalCost", "ActualTotalCost", "EarnedValueCost",
+            "RemainingTotalCost", "PercentComplete"
+        ]
+        return [
+            {k: a.get(k) for k in _ACTIVITY_COST_FIELDS}
+            for a in activities
+        ]
+</code></pre>
+      </div>
+
+      <div id="tab-res" class="tab-panel">
+        <pre><code class="language-python">class ResourceExtractor:
+    def __init__(self, client: OPCClient):
+        self.client = client
+
+    def extract_resources(self) -> list[dict]:
+        """Tenant-wide resource master (all employees, equipment)."""
+        return self.client.get_resources()
+
+    def extract_roles(self) -> list[dict]:
+        """Tenant-wide role templates (Engineer, Manager, etc.)."""
+        return self.client.get_roles()
+
+    def extract_assignments(self, project_ids: list[int]) -> list[dict]:
+        """Resource assignments across all specified projects."""
+        assignments = []
+        for pid in project_ids:
+            assignments.extend(self.client.get_resource_assignments(pid))
+        return assignments
+
+    def extract_all(self, project_ids: list[int]) -> dict:
+        return {
+            "resources":           self.extract_resources(),
+            "roles":               self.extract_roles(),
+            "resource_assignments": self.extract_assignments(project_ids)
+        }
+</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TRANSFORMERS ─── -->
+  <section id="transformers">
+    <h2>Transformers</h2>
+    <p>Pure-Python functions — no I/O, no side effects. Easy to test with just input/output assertions.</p>
+
+    <div class="tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-cost2')">cost_calculator.py</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-res2')">resource_calculator.py</button>
+      </div>
+
+      <div id="tab-cost2" class="tab-panel active">
+        <pre><code class="language-python"># Already shown in the EVM section above.
+# Here's the activity-level version:
+
+def calculate_activity_ev_metrics(activities: list, run_date=None) -> list:
+    """EVM metrics at activity granularity (drill-down reporting)."""
+    results = []
+    today = run_date or date.today().isoformat()
+
+    for a in activities:
+        pv  = a.get("PlannedTotalCost", 0) or 0
+        ev  = a.get("EarnedValueCost", 0)  or 0
+        ac  = a.get("ActualTotalCost", 0)  or 0
+
+        results.append({
+            "ACTIVITY_OBJECT_ID": a["ObjectId"],
+            "PROJECT_OBJECT_ID":  a["ProjectObjectId"],
+            "WBS_OBJECT_ID":      a.get("WBSObjectId"),
+            "RUN_DATE":           today,
+            "PV": pv, "EV": ev, "AC": ac,
+            "CPI": _safe_div(ev, ac),
+            "SPI": _safe_div(ev, pv),
+            "CV":  ev - ac,
+            "SV":  ev - pv,
+            "PERCENT_COMPLETE": a.get("PercentComplete", 0)
+        })
+
+    return results
+</code></pre>
+      </div>
+
+      <div id="tab-res2" class="tab-panel">
+        <pre><code class="language-python">from collections import defaultdict
+
+def calculate_assignment_metrics(assignments: list, run_date=None) -> list:
+    """Per-assignment utilization metrics."""
+    results = []
+    today = run_date or date.today().isoformat()
+
+    for a in assignments:
+        planned  = a.get("PlannedUnits", 0) or 0   # Hours (labor) or days (equipment)
+        actual   = a.get("ActualUnits", 0)  or 0
+        remaining= a.get("RemainingUnits", 0) or 0
+
+        utilization = _safe_div(actual, planned) * 100  # % of planned hours used
+
+        results.append({
+            "ASSIGNMENT_OBJECT_ID": a["ObjectId"],
+            "RESOURCE_OBJECT_ID":   a["ResourceObjectId"],
+            "PROJECT_OBJECT_ID":    a["ProjectObjectId"],
+            "RUN_DATE":             today,
+            "PLANNED_UNITS":   planned,
+            "ACTUAL_UNITS":    actual,
+            "REMAINING_UNITS": remaining,
+            "UTILIZATION_PCT": round(utilization, 4),
+            "UNIT_VARIANCE":   planned - actual,
+            "COST_VARIANCE":   (a.get("PlannedCost",0) or 0) - (a.get("ActualCost",0) or 0),
+            "OVER_ALLOCATED":  1 if actual > planned else 0  # NUMBER(1) in Oracle
+        })
+
+    return results
+
+def calculate_resource_summary(assignment_metrics: list, run_date=None) -> list:
+    """Aggregate across all assignments → one summary row per resource."""
+    by_resource = defaultdict(lambda: {
+        "total_planned": 0, "total_actual": 0, "total_remaining": 0,
+        "total_planned_cost": 0, "total_actual_cost": 0,
+        "assignment_count": 0, "over_allocated_count": 0
+    })
+
+    for m in assignment_metrics:
+        rid = m["RESOURCE_OBJECT_ID"]
+        by_resource[rid]["total_planned"]    += m["PLANNED_UNITS"]
+        by_resource[rid]["total_actual"]     += m["ACTUAL_UNITS"]
+        by_resource[rid]["total_remaining"]  += m["REMAINING_UNITS"]
+        by_resource[rid]["assignment_count"] += 1
+        by_resource[rid]["over_allocated_count"] += m["OVER_ALLOCATED"]
+
+    results = []
+    today = run_date or date.today().isoformat()
+
+    for rid, data in by_resource.items():
+        util = _safe_div(data["total_actual"], data["total_planned"]) * 100
+        results.append({
+            "RESOURCE_OBJECT_ID":      rid,
+            "RUN_DATE":                today,
+            "TOTAL_PLANNED_UNITS":     data["total_planned"],
+            "TOTAL_ACTUAL_UNITS":      data["total_actual"],
+            "OVERALL_UTILIZATION_PCT": round(util, 4),
+            "ASSIGNMENT_COUNT":        data["assignment_count"],
+            "OVER_ALLOCATED_COUNT":    data["over_allocated_count"]
+        })
+
+    return results
+</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── LOADERS ─── -->
+  <section id="loaders">
+    <h2>Loaders</h2>
+
+    <div class="tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-minio')">MinIOLoader</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-oracle')">OracleLoader</button>
+      </div>
+
+      <div id="tab-minio" class="tab-panel active">
+        <p>Manages two storage zones: <strong>raw</strong> (immutable JSON) and <strong>processed</strong> (compressed Parquet).</p>
+        <pre><code class="language-python">import io, json
+import pandas as pd
+from minio import Minio
+
+class MinIOLoader:
+    def __init__(self, config: dict):
+        self.client = Minio(
+            endpoint=config["endpoint"],     # e.g. "localhost:9000"
+            access_key=config["access_key"],
+            secret_key=config["secret_key"],
+            secure=config.get("secure", False)
+        )
+        self.raw_bucket  = config["raw_bucket"]       # "p6-raw"
+        self.proc_bucket = config["processed_bucket"] # "p6-processed"
+        self._ensure_buckets()
+
+    def _date_prefix(self, run_date=None) -> str:
+        """Hive-compatible partition: 2026/01/15"""
+        d = run_date or date.today().isoformat()
+        return d.replace("-", "/")  # "2026-01-15" → "2026/01/15"
+
+    def upload_raw(self, entity: str, records: list, run_date=None) -> str:
+        """Upload raw JSON to p6-raw/YYYY/MM/DD/{entity}.json"""
+        path = f"{self._date_prefix(run_date)}/{entity}.json"
+        data = json.dumps(records, default=str).encode("utf-8")
+        self.client.put_object(
+            self.raw_bucket, path,
+            io.BytesIO(data), length=len(data),
+            content_type="application/json"
+        )
+        return path
+
+    def upload_processed(self, entity: str, records: list, run_date=None) -> str:
+        """Convert to DataFrame, save as Parquet, upload."""
+        path = f"{self._date_prefix(run_date)}/{entity}.parquet"
+        df = pd.DataFrame(records)
+        buf = io.BytesIO()
+        df.to_parquet(buf, engine="pyarrow", index=False)  # Compressed columnar format
+        buf.seek(0)
+        self.client.put_object(
+            self.proc_bucket, path,
+            buf, length=buf.getbuffer().nbytes,
+            content_type="application/octet-stream"
+        )
+        return path
+
+    def download_raw(self, entity: str, run_date=None) -> list:
+        """Download and parse JSON from raw zone."""
+        path = f"{self._date_prefix(run_date)}/{entity}.json"
+        response = self.client.get_object(self.raw_bucket, path)
+        try:
+            return json.loads(response.read())
+        finally:
+            response.close()  # Always release HTTP connection!
+            response.release_conn()
+
+    def download_processed(self, entity: str, run_date=None) -> pd.DataFrame:
+        """Download Parquet from processed zone as DataFrame."""
+        path = f"{self._date_prefix(run_date)}/{entity}.parquet"
+        response = self.client.get_object(self.proc_bucket, path)
+        try:
+            return pd.read_parquet(io.BytesIO(response.read()))
+        finally:
+            response.close()
+            response.release_conn()
+</code></pre>
+      </div>
+
+      <div id="tab-oracle" class="tab-panel">
+        <p>Connection pooling + transactional bulk inserts via PL/SQL MERGE.</p>
+        <pre><code class="language-python">import oracledb
+from contextlib import contextmanager
+
+class OracleLoader:
+    def __init__(self, config: dict = None):
+        cfg = config or get_oracle_config()
+        self._dsn = f"{cfg['host']}:{cfg['port']}/{cfg['service_name']}"
+        self._user = cfg["user"]
+        self._password = cfg["password"]
+        self._pool_min = cfg.get("pool_min", 2)
+        self._pool_max = cfg.get("pool_max", 10)
+        self._pool = None  # Lazy initialization
+
+    def connect(self):
+        """Create connection pool (lazy — only when first needed)."""
+        self._pool = oracledb.create_pool(
+            user=self._user,
+            password=self._password,
+            dsn=self._dsn,
+            min=self._pool_min,   # 2 connections always open
+            max=self._pool_max,   # Scale up to 10 under load
+            increment=1           # Add one connection at a time
+        )
+
+    @contextmanager
+    def _get_connection(self):
+        if not self._pool:
+            self.connect()
+        conn = self._pool.acquire()
+        try:
+            yield conn
+            conn.commit()    # Commit on success
+        except Exception:
+            conn.rollback()  # Rollback on any exception
+            raise
+        finally:
+            self._pool.release(conn)  # Return to pool
+
+    def close(self):
+        if self._pool:
+            self._pool.close()
+
+    # Context manager support:  with OracleLoader() as loader: ...
+    def __enter__(self): return self
+    def __exit__(self, *args): self.close()
+
+    # Example upsert — all 7 tables follow the same pattern:
+    def upsert_cost_metrics(self, records: list) -> int:
+        proc = """BEGIN PKG_P6_PIPELINE.UPSERT_COST_METRIC(
+            :1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11,:12,:13,:14,:15,:16,:17,:18,:19
+        ); END;"""
+        with self._get_connection() as conn:
+            return self._bulk_execute(conn, proc, records)
+</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── UTILS ─── -->
+  <section id="utils">
+    <h2>Utils</h2>
+
+    <h3>logger.py — Structured JSON Logging</h3>
+    <pre><code class="language-python">import logging
+from pythonjsonlogger import jsonlogger
+
+_loggers = {}  # Singleton cache — prevents duplicate handlers
+
+def get_logger(name: str, level: str = "INFO") -> logging.Logger:
+    if name in _loggers:
+        return _loggers[name]  # Return existing logger
+
+    logger = logging.getLogger(name)
+    logger.setLevel(getattr(logging, level.upper()))
+
+    if not logger.handlers:
+        handler = logging.StreamHandler()  # stdout → Docker log capture
+        formatter = jsonlogger.JsonFormatter(
+            fmt="%(asctime)s %(name)s %(levelname)s %(message)s"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    _loggers[name] = logger
+    return logger
+
+# Usage across any module:
+logger = get_logger(__name__)                            # __name__ = "src.p6_client"
+logger.info("OPC token acquired", extra={"expires_at": 1737000000})
+logger.warning("Project has no BAC", extra={"project_id": "PRJ-001"})
+
+# Output (stdout, captured by Docker/Airflow):
+# {"asctime": "2026-01-15T10:30:00", "name": "src.p6_client",
+#  "levelname": "INFO", "message": "OPC token acquired", "expires_at": 1737000000}
+</code></pre>
+
+    <h3>config.py — Configuration Loading</h3>
+    <pre><code class="language-python">import os, yaml
+from functools import lru_cache
+
+@lru_cache(maxsize=1)   # Only read config.yaml once per process
+def load_config(path: str) -> dict:
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+def get_opc_config(config_path: str = None) -> dict:
+    """Merge YAML config (non-secrets) with env vars (secrets)."""
+    cfg = load_config(config_path or "config/config.yaml")
+    opc = cfg["opc"]
+    return {
+        "base_url":    opc["base_url"],
+        "token_url":   opc["token_url"],
+        "page_size":   opc.get("page_size", 500),
+        "timeout":     opc.get("timeout", 30),
+        "fields":      opc.get("fields", {}),
+        # Secrets come from environment (Docker .env file):
+        "client_id":     os.environ["OPC_CLIENT_ID"],      # Raises KeyError if missing
+        "client_secret": os.environ["OPC_CLIENT_SECRET"],  # Fast fail on startup
+        "scope":         os.environ.get("OPC_SCOPE", "")  # Optional
+    }
+</code></pre>
+  </section>
+
+  <!-- ─── AIRFLOW ─── -->
+  <section id="airflow">
+    <h2>Airflow DAGs</h2>
+    <p>Three DAGs handle different pipeline phases. Airflow provides scheduling, retry, monitoring, and inter-task communication via XCom.</p>
+
+    <div class="card-grid">
+      <div class="card-mini">
+        <h3>p6_extract_dag.py</h3>
+        <p><strong>Schedule:</strong> Daily 01:00 UTC<br>Extracts all entities from OPC API, stores raw JSON in MinIO. Pushes project_ids via XCom.</p>
+      </div>
+      <div class="card-mini">
+        <h3>p6_transform_load_dag.py</h3>
+        <p><strong>Schedule:</strong> None (triggered)<br>Reads raw JSON from MinIO, computes metrics, writes to Oracle + MinIO processed zone.</p>
+      </div>
+      <div class="card-mini">
+        <h3>p6_full_pipeline_dag.py</h3>
+        <p><strong>Schedule:</strong> Daily 02:00 UTC<br>All-in-one production DAG: extract → transform → load in sequence.</p>
+      </div>
+    </div>
+
+    <h3>Key Airflow Patterns</h3>
+
+    <div class="tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-xcom')">XCom</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-dag-struct')">DAG Structure</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-taskgroup')">Task Groups</button>
+      </div>
+
+      <div id="tab-xcom" class="tab-panel active">
+        <p><strong>XCom</strong> (Cross-Communication) lets tasks share small pieces of data (e.g., a list of project IDs extracted in one task and needed by downstream tasks).</p>
+        <pre><code class="language-python">def extract_projects(**context):
+    """Extract projects and push IDs for downstream tasks."""
+    with OPCClient(config) as client:
+        extractor = ProjectExtractor(client)
+        projects = extractor.extract_projects(status_filter=["Active", "What-if"])
+
+    # Upload raw JSON to MinIO
+    minio = MinIOLoader(minio_config)
+    minio.upload_raw("projects", projects, run_date=context["ds"])
+
+    # Push project IDs to XCom so downstream tasks can use them
+    project_ids = [p["ObjectId"] for p in projects]
+    context["ti"].xcom_push(key="project_ids", value=project_ids)
+
+
+def extract_wbs(**context):
+    """Pull project IDs from XCom, extract WBS for each."""
+    # Pull the list of IDs pushed by extract_projects
+    project_ids = context["ti"].xcom_pull(
+        task_ids="extract_projects",
+        key="project_ids"
+    )
+
+    with OPCClient(config) as client:
+        extractor = ProjectExtractor(client)
+        wbs = extractor.extract_wbs(project_ids)
+
+    minio = MinIOLoader(minio_config)
+    minio.upload_raw("wbs", wbs, run_date=context["ds"])
+</code></pre>
+      </div>
+
+      <div id="tab-dag-struct" class="tab-panel">
+        <pre><code class="language-python">from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import datetime, timedelta
+
+default_args = {
+    "owner": "p6_pipeline",
+    "retries": 2,
+    "retry_delay": timedelta(minutes=5),
+    "email_on_failure": False,  # Configure Airflow SMTP to enable
+}
+
+with DAG(
+    dag_id="p6_full_pipeline",
+    description="Daily P6 data pipeline: extract → transform → load",
+    schedule_interval="0 2 * * *",  # 02:00 UTC every day (cron syntax)
+    start_date=datetime(2026, 1, 1),
+    catchup=False,  # Don't backfill missed runs
+    default_args=default_args,
+    doc_md="""
+    ## P6 Full Pipeline
+    Extracts from OPC API, computes EVM metrics, loads to Oracle + MinIO.
+    """
+) as dag:
+
+    # Tasks are just Python functions wrapped in PythonOperator
+    t_extract_projects = PythonOperator(
+        task_id="extract_projects",
+        python_callable=extract_projects,
+    )
+
+    t_extract_wbs = PythonOperator(
+        task_id="extract_wbs",
+        python_callable=extract_wbs,
+    )
+
+    # Set dependencies with >> operator
+    t_extract_projects >> t_extract_wbs  # extract_wbs runs AFTER extract_projects
+
+    # Fan-out: multiple tasks after one upstream
+    t_extract_projects >> [t_extract_wbs, t_extract_activities, t_extract_resources]
+</code></pre>
+      </div>
+
+      <div id="tab-taskgroup" class="tab-panel">
+        <pre><code class="language-python">from airflow.utils.task_group import TaskGroup
+
+with dag:
+    # Task groups organize related tasks in the Airflow UI
+    with TaskGroup("extract", tooltip="Extract from OPC API") as tg_extract:
+        t_extract_projects   = PythonOperator(task_id="extract_projects", ...)
+        t_extract_wbs        = PythonOperator(task_id="extract_wbs", ...)
+        t_extract_activities = PythonOperator(task_id="extract_activities", ...)
+        t_extract_resources  = PythonOperator(task_id="extract_resources", ...)
+
+    with TaskGroup("transform", tooltip="Calculate metrics") as tg_transform:
+        t_transform_cost      = PythonOperator(task_id="transform_cost", ...)
+        t_transform_resources = PythonOperator(task_id="transform_resources", ...)
+        # These run in parallel (no dependency between them)
+
+    with TaskGroup("load_oracle", tooltip="Upsert to Oracle") as tg_load:
+        t_load_projects  = PythonOperator(task_id="load_projects", ...)
+        t_load_cost      = PythonOperator(task_id="load_cost_metrics", ...)
+        # 7 parallel load tasks
+
+    # Top-level dependency: extract → transform → load
+    tg_extract >> tg_transform >> tg_load
+
+    # Inner extract dependencies:
+    t_extract_projects >> [t_extract_wbs, t_extract_activities, t_extract_resources]
+</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SQL ─── -->
+  <section id="sql">
+    <h2>SQL Schema</h2>
+    <p>Seven Oracle tables in the <code>P6_DATA</code> schema. Tables use composite PKs for time-series data and cascading FKs for referential integrity.</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>Table</th><th>Primary Key</th><th>Notable Columns</th><th>FKs</th></tr>
+        <tr><td>P6_PROJECTS</td><td>OBJECT_ID</td><td>CPI, SPI, EAC, BAC, STATUS</td><td>—</td></tr>
+        <tr><td>P6_WBS</td><td>OBJECT_ID</td><td>PARENT_OBJECT_ID, WBS_LEVEL</td><td>→ P6_PROJECTS (CASCADE)</td></tr>
+        <tr><td>P6_ACTIVITIES</td><td>OBJECT_ID</td><td>PERCENT_COMPLETE, DURATION, STATUS</td><td>→ P6_PROJECTS, P6_WBS</td></tr>
+        <tr><td>P6_RESOURCES</td><td>OBJECT_ID</td><td>RESOURCE_TYPE, PRICE_PER_UNIT, IS_ACTIVE</td><td>—</td></tr>
+        <tr><td>P6_RESOURCE_ASSIGNMENTS</td><td>(OBJECT_ID, RUN_DATE)</td><td>UTILIZATION_PCT, OVER_ALLOCATED, UNIT_VARIANCE</td><td>→ P6_PROJECTS, P6_RESOURCES</td></tr>
+        <tr><td>P6_COST_METRICS</td><td>(PROJECT_OBJECT_ID, RUN_DATE)</td><td>CPI, SPI, CV, SV, EAC, VAC, TCPI, CV_PCT, SV_PCT</td><td>→ P6_PROJECTS</td></tr>
+        <tr><td>P6_RESOURCE_METRICS</td><td>(RESOURCE_OBJECT_ID, RUN_DATE)</td><td>OVERALL_UTILIZATION_PCT, ASSIGNMENT_COUNT</td><td>→ P6_RESOURCES</td></tr>
+      </table>
+    </div>
+
+    <div class="code-label">sql/create_tables.sql — P6_COST_METRICS (time-series table)</div>
+    <pre><code class="language-sql">CREATE TABLE P6_DATA.P6_COST_METRICS (
+    -- Composite PK: one record per project per day
+    PROJECT_OBJECT_ID  NUMBER        NOT NULL,
+    RUN_DATE           DATE          NOT NULL,
+
+    -- EVM base values
+    PV                 NUMBER(20,4),   -- Planned Value
+    EV                 NUMBER(20,4),   -- Earned Value
+    AC                 NUMBER(20,4),   -- Actual Cost
+    BAC                NUMBER(20,4),   -- Budget at Completion
+
+    -- Performance indices (6 decimal precision)
+    CPI                NUMBER(10,6),   -- Cost Performance Index
+    SPI                NUMBER(10,6),   -- Schedule Performance Index
+
+    -- Variances
+    CV                 NUMBER(20,4),   -- Cost Variance
+    SV                 NUMBER(20,4),   -- Schedule Variance
+    CV_PCT             NUMBER(10,4),   -- CV as % of BAC
+    SV_PCT             NUMBER(10,4),   -- SV as % of BAC
+
+    -- Forecasts
+    EAC                NUMBER(20,4),   -- Estimate at Completion
+    VAC                NUMBER(20,4),   -- Variance at Completion
+    TCPI               NUMBER(10,6),   -- To-Complete Performance Index
+
+    EAC_METHOD         VARCHAR2(30),   -- "BAC_CPI" or "AC_PLUS_REMAINING"
+    LOAD_TIMESTAMP     TIMESTAMP DEFAULT SYSTIMESTAMP,
+
+    CONSTRAINT PK_COST_METRICS PRIMARY KEY (PROJECT_OBJECT_ID, RUN_DATE),
+    CONSTRAINT FK_COST_PROJECT FOREIGN KEY (PROJECT_OBJECT_ID)
+        REFERENCES P6_DATA.P6_PROJECTS(OBJECT_ID) ON DELETE CASCADE
+);
+
+-- Index for fast date-range queries ("show me last 30 days of CPI for all projects")
+CREATE INDEX IDX_COST_DATE ON P6_DATA.P6_COST_METRICS(RUN_DATE);
+
+-- Grant access to pipeline user
+GRANT SELECT, INSERT, UPDATE, DELETE ON P6_DATA.P6_COST_METRICS TO p6_pipeline_user;
+</code></pre>
+
+    <div class="callout callout-info">
+      <strong>Why composite PKs for metric tables?</strong>
+      <p>Tables like P6_COST_METRICS are time-series: each day adds a new row per project. Using <code>(PROJECT_OBJECT_ID, RUN_DATE)</code> as the PK ensures one record per project per day, and the MERGE upsert updates it if the pipeline re-runs on the same day (idempotent).</p>
+    </div>
+  </section>
+
+  <!-- ─── DOCKER ─── -->
+  <section id="docker">
+    <h2>Docker Setup</h2>
+    <p>The full stack runs in Docker Compose: Airflow (webserver + scheduler), PostgreSQL (Airflow metadata), and MinIO (object storage).</p>
+
+    <div class="diagram">
+┌─────────────────────────────────────────────────────────────────┐
+│                    Docker Network: p6_net                       │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
+│  │  postgres:15 │  │ airflow-webserver │  │     minio        │  │
+│  │  port: 5432  │  │  port: 8080      │  │  port: 9000 API  │  │
+│  │  (Airflow DB)│  │  UI + REST API   │  │  port: 9001 UI   │  │
+│  └──────┬───────┘  └────────┬─────────┘  └──────────────────┘  │
+│         │                   │                                   │
+│         │          ┌────────┴─────────┐                         │
+│         └──────────│ airflow-scheduler │                         │
+│                    │  reads DAG files  │                         │
+│                    └──────────────────┘                         │
+└─────────────────────────────────────────────────────────────────┘
+    Volumes: dags/, src/, config/ (live reload — no rebuild needed)</div>
+
+    <div class="code-label">docker/docker-compose.yml — YAML anchor pattern</div>
+    <pre><code class="language-yaml"># YAML anchors (&) allow DRY configuration
+# All Airflow services inherit the same base config
+x-airflow-common: &airflow-common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  env_file: ../.env       # Load all secrets from .env file
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+  volumes:
+    - ../dags:/opt/airflow/dags        # Live reload — edit DAGs without rebuild
+    - ../src:/opt/airflow/src          # Source code
+    - ../config:/opt/airflow/config    # Config YAML
+    - airflow_logs:/opt/airflow/logs   # Persistent logs
+  depends_on:
+    postgres:
+      condition: service_healthy       # Wait until Postgres is ready
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common               # << merges anchor content
+    command: >
+      bash -c "airflow db migrate &&
+               airflow users create
+               --username admin --password admin
+               --firstname P6 --lastname Admin
+               --role Admin --email admin@example.com"
+    restart: "no"                     # One-shot container
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"    # S3 API
+      - "9001:9001"    # Web console
+</code></pre>
+
+    <h3>Dockerfile</h3>
+    <pre><code class="language-dockerfile">FROM apache/airflow:2.8.4-python3.11
+
+# Switch to root only for apt installs, then back to airflow user
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Copy application code
+COPY src/    /opt/airflow/src/
+COPY config/ /opt/airflow/config/
+COPY dags/   /opt/airflow/dags/
+
+# Make sure Python can find our src/ package
+ENV PYTHONPATH="/opt/airflow:${PYTHONPATH}"
+ENV AIRFLOW_HOME=/opt/airflow
+</code></pre>
+
+    <div class="callout callout-success">
+      <strong>Quick Start</strong>
+      <p>Copy <code>.env.example</code> to <code>.env</code>, fill in credentials, then run: <code>docker compose -f docker/docker-compose.yml up -d</code>. Access Airflow at http://localhost:8080 (admin/admin).</p>
+    </div>
+  </section>
+
+  <!-- ─── JENKINS ─── -->
+  <section id="jenkins">
+    <h2>Jenkins CI/CD</h2>
+    <p>Declarative pipeline: Lint → Test → Build → Push → Deploy. Runs automatically on every git push.</p>
+
+    <div class="flow" style="flex-wrap: wrap; gap: 4px;">
+      <div class="flow-box purple">Checkout</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Setup venv</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">flake8 Lint</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">pytest + coverage</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box orange">Docker Build</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box pink">Push Registry</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box orange">Deploy (main only)</div>
+    </div>
+
+    <div class="code-label">jenkins/Jenkinsfile</div>
+    <pre><code class="language-groovy">pipeline {
+    agent any
+    environment {
+        DOCKER_REGISTRY_CREDS = credentials('docker-registry-credentials')
+        PIPELINE_ENV_FILE     = credentials('pipeline-env-file')  // Secret .env file
+        IMAGE_NAME = "p6-pipeline"
+        FULL_IMAGE = "${IMAGE_NAME}:${BUILD_NUMBER}"
+        LATEST_IMAGE = "${IMAGE_NAME}:latest"
+    }
+
+    stages {
+        stage('Lint') {
+            steps {
+                sh """
+                    . venv/bin/activate
+                    flake8 src/ dags/ tests/ --max-line-length=120 --statistics
+                """
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                sh """
+                    . venv/bin/activate
+                    pytest tests/ --cov=src --cov-report=xml --junitxml=test-results.xml -v
+                """
+            }
+            post {
+                always {
+                    junit 'test-results.xml'                          // Publish test results
+                    publishCoverage adapters: [coberturaAdapter('coverage.xml')]
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -f docker/Dockerfile -t ${FULL_IMAGE} -t ${LATEST_IMAGE} ."
+            }
+        }
+
+        stage('Push to Registry') {
+            when { branch pattern: 'main|master|release/*', comparator: 'REGEXP' }
+            steps {
+                sh """
+                    echo "${DOCKER_REGISTRY_CREDS_PSW}" | docker login -u "${DOCKER_REGISTRY_CREDS_USR}" --password-stdin
+                    docker push ${FULL_IMAGE}
+                    docker push ${LATEST_IMAGE}
+                """
+            }
+            post { always { sh 'docker logout' } }
+        }
+
+        stage('Deploy') {
+            when { branch 'main' }
+            steps {
+                sh """
+                    cp ${PIPELINE_ENV_FILE} .env
+                    docker compose -f docker/docker-compose.yml up -d --force-recreate
+                """
+                // Health check with retries
+                retry(5) {
+                    sh 'curl -sf http://localhost:8080/health'
+                    sleep 10
+                }
+            }
+        }
+    }
+
+    post {
+        always { sh 'docker image prune -f' }
+        success { echo "Deployed image: ${FULL_IMAGE}" }
+        failure { echo "Pipeline failed at stage: ${env.STAGE_NAME}" }
+    }
+}
+</code></pre>
+  </section>
+
+  <!-- ─── CONFIG ─── -->
+  <section id="config">
+    <h2>Configuration Reference</h2>
+
+    <h3>config/config.yaml — Non-secret settings</h3>
+    <pre><code class="language-yaml">opc:
+  base_url:   "https://your-tenant.oraclecloud.com/ppmrestapi/v2"
+  token_url:  "https://idcs-xxx.identity.oraclecloud.com/oauth2/v1/token"
+  page_size:  500     # Records per API request (OPC max: 500)
+  timeout:    30      # HTTP request timeout in seconds
+  max_retries: 3
+  fields:
+    projects:  [ObjectId, Name, Status, StartDate, FinishDate, DataDate,
+                TotalBudgetedCost, ActualTotalCost, EarnedValueCost,
+                PlannedValueCost, BudgetAtCompletion]
+    wbs:       [ObjectId, Name, Code, ProjectObjectId, ParentObjectId]
+    activities: [ObjectId, Name, ProjectObjectId, WBSObjectId, Status,
+                 PlannedTotalCost, ActualTotalCost, EarnedValueCost,
+                 PercentComplete, PlannedDuration, ActualDuration,
+                 RemainingDuration, StartDate, FinishDate]
+
+oracle:
+  host: "oracle-db.company.com"
+  port: 1521
+  service_name: "ORCL"
+  schema: "P6_DATA"
+  pool_min: 2
+  pool_max: 10
+
+minio:
+  endpoint: "localhost:9000"
+  secure: false
+  raw_bucket: "p6-raw"
+  processed_bucket: "p6-processed"
+
+pipeline:
+  project_status_filter: ["Active", "What-if"]
+  eac_method: "BAC_CPI"   # or "AC_PLUS_REMAINING"
+</code></pre>
+
+    <h3>.env.example — Secrets template</h3>
+    <pre><code class="language-bash"># Oracle Primavera Cloud credentials
+OPC_CLIENT_ID=your-client-id
+OPC_CLIENT_SECRET=your-client-secret
+
+# Oracle DB credentials
+ORACLE_USER=p6_pipeline_user
+ORACLE_PASSWORD=secret-password
+
+# MinIO credentials
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+
+# Airflow security
+AIRFLOW__CORE__FERNET_KEY=your-fernet-key  # Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+</code></pre>
+  </section>
+
+  <!-- ─── TESTING ─── -->
+  <section id="testing">
+    <h2>Testing</h2>
+
+    <div class="tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-t1')">API Tests</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-t2')">Transformer Tests</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-t3')">Loader Tests</button>
+      </div>
+
+      <div id="tab-t1" class="tab-panel active">
+        <p>Uses the <code>responses</code> library to intercept HTTP requests and return mock data without network calls.</p>
+        <pre><code class="language-python">import responses
+import pytest
+from src.p6_client import OPCClient
+
+MOCK_CONFIG = {
+    "base_url":    "https://mock.oraclecloud.com/ppmrestapi/v2",
+    "token_url":   "https://mock-idcs.identity.oraclecloud.com/oauth2/v1/token",
+    "client_id":   "test-client", "client_secret": "test-secret",
+    "page_size":   500, "timeout": 30
+}
+
+TOKEN_RESPONSE = {"access_token": "mock-token", "expires_at": 9999999999}
+
+class TestOPCClient:
+    @responses.activate
+    def test_get_projects_returns_list(self):
+        # Mock the token endpoint
+        responses.add(responses.POST, MOCK_CONFIG["token_url"], json=TOKEN_RESPONSE)
+
+        # Mock the projects endpoint (one page, 2 records)
+        responses.add(responses.GET,
+            f"{MOCK_CONFIG['base_url']}/projects",
+            json=[
+                {"ObjectId": 1001, "Name": "Bridge Project", "Status": "Active"},
+                {"ObjectId": 1002, "Name": "Road Project",   "Status": "What-if"}
+            ]
+        )
+
+        with OPCClient(config=MOCK_CONFIG) as client:
+            result = client.get_projects()
+
+        assert len(result) == 2
+        assert result[0]["ObjectId"] == 1001
+
+    @responses.activate
+    def test_pagination_fetches_all_pages(self):
+        """Test that _get_all() fetches multiple pages correctly."""
+        responses.add(responses.POST, MOCK_CONFIG["token_url"], json=TOKEN_RESPONSE)
+
+        # Page 1: full page (500 records → more pages expected)
+        responses.add(responses.GET, f"{MOCK_CONFIG['base_url']}/projects",
+            json=[{"ObjectId": i} for i in range(500)])
+        # Page 2: partial page (200 records → last page)
+        responses.add(responses.GET, f"{MOCK_CONFIG['base_url']}/projects",
+            json=[{"ObjectId": i} for i in range(500, 700)])
+
+        with OPCClient(config=MOCK_CONFIG) as client:
+            result = client._get_all("/projects", fields=["ObjectId"])
+
+        assert len(result) == 700   # 500 + 200
+</code></pre>
+      </div>
+
+      <div id="tab-t2" class="tab-panel">
+        <p>Pure math tests — no mocks needed. Just input dicts → assert on output values.</p>
+        <pre><code class="language-python">import pytest
+from src.transformers.cost_calculator import calculate_project_ev_metrics
+
+class TestCostCalculator:
+    def _make_project(self, pv, ev, ac, bac, obj_id=1001):
+        return {
+            "ObjectId": obj_id,
+            "PlannedValueCost": pv,
+            "EarnedValueCost":  ev,
+            "ActualTotalCost":  ac,
+            "TotalBudgetedCost": bac
+        }
+
+    def test_cpi_on_budget(self):
+        """CPI = 1.0 when EV equals AC (perfectly on budget)."""
+        project = self._make_project(pv=1000, ev=1000, ac=1000, bac=2000)
+        metrics = calculate_project_ev_metrics([project])
+        assert metrics[0]["CPI"] == pytest.approx(1.0, rel=1e-4)
+
+    def test_cpi_over_budget(self):
+        """CPI < 1.0 when spending more than earned."""
+        project = self._make_project(pv=1000, ev=800, ac=1000, bac=2000)
+        metrics = calculate_project_ev_metrics([project])
+        # CPI = 800/1000 = 0.8
+        assert metrics[0]["CPI"] == pytest.approx(0.8, rel=1e-4)
+
+    def test_eac_bac_cpi_method(self):
+        """EAC = BAC / CPI when using BAC_CPI method."""
+        project = self._make_project(pv=500, ev=400, ac=500, bac=1000)
+        metrics = calculate_project_ev_metrics([project], eac_method="BAC_CPI")
+        # CPI = 400/500 = 0.8; EAC = 1000/0.8 = 1250
+        assert metrics[0]["EAC"] == pytest.approx(1250.0, rel=1e-4)
+
+    def test_zero_ac_no_division_error(self):
+        """_safe_div handles zero denominator gracefully."""
+        project = self._make_project(pv=500, ev=0, ac=0, bac=1000)
+        metrics = calculate_project_ev_metrics([project])
+        assert metrics[0]["CPI"] == 0  # Default value, no exception
+</code></pre>
+      </div>
+
+      <div id="tab-t3" class="tab-panel">
+        <p>Uses <code>unittest.mock.patch</code> to replace MinIO and Oracle clients with <code>MagicMock</code> objects.</p>
+        <pre><code class="language-python">import pytest
+from unittest.mock import patch, MagicMock
+from src.loaders.minio_loader import MinIOLoader
+
+@pytest.fixture
+def mock_minio():
+    with patch("src.loaders.minio_loader.Minio") as mock_cls:
+        instance = MagicMock()
+        mock_cls.return_value = instance
+        instance.bucket_exists.return_value = True  # Buckets already exist
+        yield instance
+
+class TestMinIOLoader:
+    def test_upload_raw_calls_put_object(self, mock_minio):
+        config = {
+            "endpoint": "localhost:9000",
+            "access_key": "key", "secret_key": "secret",
+            "secure": False,
+            "raw_bucket": "p6-raw", "processed_bucket": "p6-processed"
+        }
+        loader = MinIOLoader(config)
+        records = [{"ObjectId": 1, "Name": "Test"}]
+        path = loader.upload_raw("projects", records, run_date="2026-01-15")
+
+        # Verify put_object was called with correct bucket and path
+        mock_minio.put_object.assert_called_once()
+        args = mock_minio.put_object.call_args
+        assert args[0][0] == "p6-raw"             # bucket
+        assert "2026/01/15/projects.json" in args[0][1]  # path
+</code></pre>
+      </div>
+    </div>
+
+    <div class="code-label">Run all tests</div>
+    <pre><code class="language-bash"># Run all tests with coverage report
+pytest tests/ --cov=src --cov-report=term-missing -v
+
+# Run a specific file
+pytest tests/test_transformers.py -v
+
+# Run a specific test
+pytest tests/test_transformers.py::TestCostCalculator::test_cpi_over_budget -v
+</code></pre>
+  </section>
+
+  <!-- ─── QUICKSTART ─── -->
+  <section id="quickstart">
+    <h2>Quickstart Guide</h2>
+
+    <div class="callout callout-warn">
+      <strong>Prerequisites</strong>
+      <p>Docker + Docker Compose, OPC tenant credentials, Oracle DB (or use the docker-compose stack), Python 3.11+</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Configure secrets</h3>
+          <pre><code class="language-bash">cp .env.example .env
+# Edit .env and fill in OPC_CLIENT_ID, OPC_CLIENT_SECRET, ORACLE_*, MINIO_*</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Start the stack</h3>
+          <pre><code class="language-bash">docker compose -f docker/docker-compose.yml up -d
+# Wait ~30 seconds for services to initialize</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Create Oracle tables</h3>
+          <pre><code class="language-bash"># Connect to Oracle as DBA and run:
+sqlplus sys/password@//host:1521/ORCL as sysdba @sql/create_tables.sql
+sqlplus sys/password@//host:1521/ORCL as sysdba @sql/upsert_procedures.sql</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Configure Airflow Variables</h3>
+          <p>Open http://localhost:8080 → Admin → Variables. Add:</p>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Key</th><th>Value</th></tr>
+              <tr><td>opc_base_url</td><td>https://your-tenant.oraclecloud.com/ppmrestapi/v2</td></tr>
+              <tr><td>opc_token_url</td><td>https://idcs-xxx.identity.oraclecloud.com/oauth2/v1/token</td></tr>
+              <tr><td>opc_client_id</td><td>your-client-id</td></tr>
+              <tr><td>opc_client_secret</td><td>your-client-secret</td></tr>
+              <tr><td>pipeline_config_path</td><td>/opt/airflow/config/config.yaml</td></tr>
+              <tr><td>eac_method</td><td>BAC_CPI</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Trigger the pipeline</h3>
+          <pre><code class="language-bash"># Via Airflow UI: DAGs → p6_full_pipeline → Trigger DAG
+# Or via CLI:
+docker exec airflow-scheduler airflow dags trigger p6_full_pipeline</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>Verify results</h3>
+          <pre><code class="language-sql">-- Check loaded projects
+SELECT PROJECT_NAME, CPI, SPI, EAC, LOAD_TIMESTAMP
+FROM P6_DATA.P6_PROJECTS
+ORDER BY LOAD_TIMESTAMP DESC;
+
+-- Check EVM metrics time-series
+SELECT p.PROJECT_NAME, m.RUN_DATE, m.CPI, m.SPI, m.EAC
+FROM P6_DATA.P6_COST_METRICS m
+JOIN P6_DATA.P6_PROJECTS p ON p.OBJECT_ID = m.PROJECT_OBJECT_ID
+WHERE m.RUN_DATE >= SYSDATE - 7   -- Last 7 days
+ORDER BY m.RUN_DATE DESC, p.PROJECT_NAME;</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Initialize syntax highlighting
+  hljs.highlightAll();
+
+  // Tab switching
+  function switchTab(event, panelId) {
+    const btn = event.target;
+    const tabBar = btn.closest('.tab-bar');
+    const tabs = btn.closest('.tabs');
+
+    tabBar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    tabs.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+    btn.classList.add('active');
+    document.getElementById(panelId).classList.add('active');
+
+    // Re-highlight code in newly shown panel
+    document.getElementById(panelId).querySelectorAll('code').forEach(el => {
+      if (!el.dataset.highlighted) hljs.highlightElement(el);
+    });
+  }
+
+  // Active nav link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+
+  function updateNav() {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+</script>
+</body>
+</html>
